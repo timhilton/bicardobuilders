@@ -1,0 +1,262 @@
+---
+import logo from "../assets/BicardoBuilders.svg";
+import arrow from '../assets/arrowsvg.svg'
+import heroPhoto from "../assets/russian_hill_3_original.webp";
+import Image from "astro/components/Image.astro";
+import { getStory } from '../lib/storyblok';
+
+const story = await getStory('home');
+const content = story?.content;
+
+const tagline = content?.tagline ?? null;
+const ctaLabel = content?.cta_label ?? 'View our portfolio';
+const ctaUrl = content?.cta_url ?? '/portfolio';
+const heroImageUrl = content?.hero_image?.filename ?? null;
+---
+
+<main class="main">
+	<!-- Mobile-only logo shown above the hero image -->
+	<div class="mobile-logo">
+		<Image
+			transition:name="logo"
+			src={logo}
+			alt="Bicardo Builders Inc"
+			class="mobile-logo__img"
+			width={200}
+			height={68}
+			loading="eager"
+			decoding="async"
+		/>
+	</div>
+
+	<section class="hero__media" aria-hidden="true">
+		{heroImageUrl ? (
+			<img
+				src={heroImageUrl}
+				alt=""
+				class="hero__img"
+				loading="eager"
+				decoding="async"
+			/>
+		) : (
+			<Image
+				src={heroPhoto}
+				alt=""
+				class="hero__img"
+				widths={[800, 1200, 1600, 2000]}
+				sizes="(min-width: 900px) 46vw, 100vw"
+				loading="eager"
+				decoding="async"
+			/>
+		)}
+	</section>
+
+	<section class="hero__content" aria-label="Intro">
+		<div class="content__inner">
+			<!-- Desktop logo — hidden on mobile -->
+			<Image
+				transition:name="logo"
+				src={logo}
+				alt="Bicardo Builders Inc"
+				class="content__logo"
+				widths={[320, 480, 640]}
+				sizes="(min-width: 900px) 26vw, 70vw"
+				loading="eager"
+				decoding="async"
+			/>
+
+			<p class="content__copy">
+				{tagline ? tagline : (
+					<>
+						With over <strong>20 years of building experience</strong>, we
+						craft spaces that reflect our clients' style and needs, built
+						with care, precision, and attention to every detail.
+					</>
+				)}
+			</p>
+
+			<a class="content__cta" href={ctaUrl}>
+				<span class="cta__label">{ctaLabel}</span>
+				<Image
+					src={arrow}
+					alt=""
+					class="content__arrow"
+					loading="eager"
+					decoding="async"
+				/>
+			</a>
+		</div>
+	</section>
+</main>
+
+<style>
+	:global(:root) {
+		color-scheme: light;
+	}
+
+	/* ===== MAIN GRID ===== */
+	.main {
+		min-height: 100svh;
+		display: grid;
+		grid-template-columns: repeat(24, minmax(0, 1fr));
+	}
+
+	/* Mobile logo hidden on desktop */
+	.mobile-logo {
+		display: none;
+	}
+
+	/* ===== HERO MEDIA ===== */
+	.hero__media {
+		grid-column: 1 / 12;
+		min-height: 100svh;
+		position: relative;
+		overflow: hidden;
+		background: #0b1220;
+	}
+
+	.hero__img {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	/* ===== HERO CONTENT ===== */
+	.hero__content {
+		grid-column: 12 / -1;
+		display: grid;
+		place-items: center;
+		padding: clamp(24px, 4vw, 64px);
+		background: #f6f7f9;
+	}
+
+	.content__inner {
+		width: min(560px, 100%);
+		text-align: center;
+	}
+
+	.content__logo {
+		width: min(420px, 90%);
+		height: auto;
+		margin-inline: auto;
+		display: block;
+	}
+
+	.content__copy {
+		margin: 20px 0 40px;
+		font-size: clamp(16px, 1.5vw, 18px);
+		line-height: 1.7;
+		color: #374151;
+	}
+
+	.content__copy strong {
+		font-weight: 700;
+		color: #111827;
+	}
+
+	/* ===== CTA (desktop) ===== */
+	.content__cta {
+		display: inline-flex;
+		align-items: center;
+		gap: 16px;
+		font-size: clamp(18px, 1.8vw, 22px);
+		text-decoration: none;
+		color: #111827;
+		padding: 10px 6px;
+		border-radius: 10px;
+		margin-inline-start: 92px;
+		transition: transform 140ms ease, background-color 140ms ease;
+	}
+
+	.content__arrow {
+		transition: transform 160ms ease;
+	}
+
+	.content__cta:hover .content__arrow {
+		transform: translateX(6px);
+	}
+
+	/* ===== MOBILE ===== */
+	@media (max-width: 899px) {
+		.main {
+			display: flex;
+			flex-direction: column;
+			min-height: 100svh;
+		}
+
+		/* 1 — Mobile logo */
+		.mobile-logo {
+			display: flex;
+			justify-content: center;
+			padding: 32px 24px 24px;
+			background: #f6f7f9;
+			order: 1;
+		}
+
+		.mobile-logo__img {
+			width: 180px;
+			height: auto;
+		}
+
+		/* 2 — Hero photo */
+		.hero__media {
+			order: 2;
+			min-height: 56vw;
+			flex: 0 0 auto;
+		}
+
+		/* 3 — CTA + copy */
+		.hero__content {
+			order: 3;
+			padding: 32px 24px 40px;
+			place-items: start;
+		}
+
+		.content__inner {
+			width: 100%;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			text-align: center;
+		}
+
+		/* Desktop logo invisible on mobile */
+		.content__logo {
+			display: none;
+		}
+
+		/* CTA becomes teal pill, moves above copy */
+		.content__cta {
+			order: 1;
+			background: #4892be;
+			color: #fff;
+			border-radius: 24px;
+			padding: 13px 36px;
+			font-size: 15px;
+			font-weight: 600;
+			letter-spacing: 0.08em;
+			text-transform: uppercase;
+			gap: 0;
+			margin-inline-start: 0;
+			transition: background 140ms ease, transform 140ms ease;
+		}
+
+		.content__cta:hover {
+			background: #3a7aa8;
+			transform: translateY(-1px);
+		}
+
+		.content__arrow {
+			display: none;
+		}
+
+		/* Copy sits below the CTA */
+		.content__copy {
+			order: 2;
+			margin: 28px 0 0;
+			font-size: 16px;
+		}
+	}
+</style>

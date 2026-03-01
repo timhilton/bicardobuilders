@@ -1,0 +1,37 @@
+---
+import Layout from './Layout.astro';
+import Navigation from '../components/navigation.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  activePath?: string;
+}
+
+const { title, description, activePath = Astro.url.pathname } = Astro.props;
+---
+
+<Layout title={title} description={description}>
+  <div class="page-wrapper">
+    <Navigation activePath={activePath} align="left" />
+    <main class="page-main">
+      <slot />
+    </main>
+    <Footer />
+  </div>
+</Layout>
+
+<style>
+  .page-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: #f9fafb;
+  }
+
+  .page-main {
+    flex: 1;
+    width: 100%;
+  }
+</style>

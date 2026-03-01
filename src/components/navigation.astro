@@ -1,0 +1,245 @@
+---
+import { Image } from "astro:assets";
+import logo from "../assets/BicardoBuilders.svg";
+
+interface LinkItem {
+    label: string;
+    href: string;
+}
+
+interface Props {
+    links?: LinkItem[];
+    activePath?: string;
+    align?: "left" | "center" | "right";
+}
+
+const {
+    links = [
+        { label: "ABOUT", href: "/about" },
+        { label: "SERVICES", href: "/services" },
+        { label: "PORTFOLIO", href: "/portfolio" },
+        { label: "CONTACT", href: "/contact" },
+    ],
+    activePath = "",
+    align = "center",
+} = Astro.props;
+
+const justify =
+    align === "left" ? "flex-start" : align === "right" ? "flex-end" : "center";
+
+const isActive = (href: string) =>
+    activePath === href || (href !== "/" && activePath.startsWith(href + "/"));
+---
+
+<nav class="nav" aria-label="Primary">
+    <a href="/" class="nav__logo">
+        <Image
+            transition:name="logo"
+            class="nav-logo"
+            src={logo}
+            alt="Bicardo Builders Inc"
+            width={123}
+            height={42}
+            loading="eager"
+            decoding="async"
+        />
+    </a>
+
+    <button
+        class="nav__toggle"
+        aria-label="Open navigation"
+        aria-expanded="false"
+        aria-controls="nav-menu"
+    >
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <ul id="nav-menu" class="nav__list" style={`justify-content:${justify}`}>
+        {
+            links.map((item) => (
+                <li class="nav__item">
+                    <a
+                        class:list={[
+                            "nav__link",
+                            isActive(item.href) && "nav__link--active",
+                        ]}
+                        href={item.href}
+                        aria-current={isActive(item.href) ? "page" : undefined}
+                    >
+                        {item.label}
+                    </a>
+                </li>
+            ))
+        }
+    </ul>
+</nav>
+
+<style>
+    .nav {
+        width: 100%;
+        max-width: 1200px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: #4892be 1px solid;
+        align-self: center;
+        margin-top: 21px;
+        padding-bottom: 13px;
+        box-sizing: border-box;
+        padding-inline: 24px;
+        flex-wrap: wrap;
+    }
+
+    .nav-logo {
+        left: 0%;
+        right: 0.07%;
+        top: 0%;
+        bottom: 0.19%;
+    }
+
+    .nav__list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        gap: 28px;
+        align-items: center;
+    }
+
+    .nav__link {
+        text-decoration: none;
+        color: #111827;
+        font-size: 16px;
+        line-height: 1;
+        letter-spacing: 0.08em;
+        padding: 8px 6px;
+        border-radius: 4px;
+        transition:
+            background-color 140ms ease,
+            color 140ms ease;
+    }
+
+    .nav__link:hover {
+        background: rgba(17, 24, 39, 0.06);
+    }
+
+    .nav__link:focus-visible {
+        outline: 3px solid rgba(72, 146, 190, 0.35);
+        outline-offset: 4px;
+    }
+
+    .nav__link--active {
+        text-decoration: underline;
+        text-underline-offset: 4px;
+        text-decoration-color: #4892be;
+        text-decoration-thickness: 2px;
+    }
+
+    /* Hamburger button — hidden on desktop */
+    .nav__toggle {
+        display: none;
+    }
+
+    /* ===== MOBILE ===== */
+    @media (max-width: 768px) {
+        .nav {
+            margin-top: 16px;
+            padding-bottom: 12px;
+            gap: 0;
+        }
+
+        /* Hamburger visible on mobile */
+        .nav__toggle {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 5px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 6px 4px;
+            margin-inline-start: auto;
+        }
+
+        .nav__toggle span {
+            display: block;
+            width: 22px;
+            height: 2px;
+            background: #111827;
+            border-radius: 2px;
+            transition: transform 220ms ease, opacity 220ms ease;
+        }
+
+        /* Animate to X when open */
+        .nav__toggle[aria-expanded="true"] span:nth-child(1) {
+            transform: translateY(7px) rotate(45deg);
+        }
+        .nav__toggle[aria-expanded="true"] span:nth-child(2) {
+            opacity: 0;
+        }
+        .nav__toggle[aria-expanded="true"] span:nth-child(3) {
+            transform: translateY(-7px) rotate(-45deg);
+        }
+
+        /* Nav list hidden by default, full-width row when open */
+        .nav__list {
+            display: none;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0;
+            width: 100%;
+            padding: 8px 0 4px;
+            margin-top: 12px;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .nav__list.is-open {
+            display: flex;
+        }
+
+        .nav__item {
+            width: 100%;
+        }
+
+        .nav__link {
+            display: block;
+            width: 100%;
+            padding: 13px 0;
+            border-bottom: 1px solid #f3f4f6;
+            border-radius: 0;
+            font-size: 15px;
+        }
+
+        .nav__link:hover {
+            background: none;
+            color: #4892be;
+        }
+    }
+</style>
+
+<script>
+    function initNav() {
+        const toggle = document.querySelector<HTMLButtonElement>('.nav__toggle');
+        const menu = document.querySelector<HTMLElement>('#nav-menu');
+        if (!toggle || !menu) return;
+
+        toggle.onclick = () => {
+            const open = menu.classList.toggle('is-open');
+            toggle.setAttribute('aria-expanded', String(open));
+            toggle.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+        };
+
+        // Close when a link is clicked
+        menu.querySelectorAll('.nav__link').forEach((link) => {
+            link.addEventListener('click', () => {
+                menu.classList.remove('is-open');
+                toggle.setAttribute('aria-expanded', 'false');
+                toggle.setAttribute('aria-label', 'Open navigation');
+            });
+        });
+    }
+
+    document.addEventListener('astro:page-load', initNav);
+</script>

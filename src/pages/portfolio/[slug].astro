@@ -1,0 +1,253 @@
+---
+import PageLayout from '../../layouts/PageLayout.astro';
+import { getStories } from '../../lib/storyblok';
+import { renderRichText } from '@storyblok/astro';
+
+export async function getStaticPaths() {
+  const stories = await getStories({ starts_with: 'projects/' });
+
+  // If no Storyblok token or no stories, return an empty array for static build
+  if (!stories.length) return [];
+
+  return stories.map((story: any) => ({
+    params: { slug: story.slug },
+    props: { story },
+  }));
+}
+
+const { story } = Astro.props as { story: any };
+
+if (!story) {
+  return Astro.redirect('/portfolio');
+}
+
+const content = story.content ?? {};
+const title: string = content.title ?? story.name ?? 'Project';
+const projectType: string = content.project_type ?? '';
+const year: string = content.year ?? '';
+const descriptionHtml: string | null = content.description ? renderRichText(content.description) : null;
+const images: any[] = content.images ?? [];
+---
+
+<PageLayout
+  title={`${title} | Bicardo Builders Inc`}
+  description={`${title} — ${projectType} ${year}`.trim()}
+  activePath="/portfolio"
+>
+  <div class="case-study">
+    <div class="case-study__inner">
+      <h1 class="case-study__title" transition:name="page-heading">{title.toUpperCase()}</h1>
+      {(projectType || year) && (
+        <p class="case-study__subtitle">
+          {[projectType, year].filter(Boolean).join(' • ')}
+        </p>
+      )}
+
+      {descriptionHtml && (
+        <div class="case-study__description" set:html={descriptionHtml} />
+      )}
+
+      {images.length > 0 ? (
+        <div class="photo-grid">
+          {images.map((img: any, i: number) => (
+            <div class:list={['photo-grid__item', i % 3 === 0 && 'photo-grid__item--wide']}>
+              <img
+                src={img.file?.filename}
+                alt={img.alt ?? title}
+                class="photo-grid__img"
+                loading={i < 2 ? 'eager' : 'lazy'}
+              />
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div class="photo-grid__empty">
+          <p>Photos coming soon.</p>
+        </div>
+      )}
+
+      <div class="case-study__back">
+        <a href="/portfolio" class="btn-pill">← Back to Portfolio</a>
+      </div>
+    </div>
+  </div>
+</PageLayout>
+
+<style>
+  .case-study {
+    padding-bottom: 80px;
+  }
+
+  .case-study__inner {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .case-study__title {
+    font-size: clamp(24px, 4vw, 38px);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #111827;
+    margin: 48px 0 8px;
+  }
+
+  .case-study__subtitle {
+    font-size: 16px;
+    color: #4892be;
+    font-weight: 600;
+    margin: 0 0 32px;
+    letter-spacing: 0.02em;
+  }
+
+  .case-study__description {
+    color: #374151;
+    font-size: 16px;
+    line-height: 1.7;
+    margin-bottom: 40px;
+  }
+
+  .case-study__description :global(p) {
+    margin: 0 0 16px;
+  }
+
+  /* Masonry-style 2-col grid */
+  .photo-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 48px;
+  }
+
+  .photo-grid__item {
+    overflow: hidden;
+  }
+
+  .photo-grid__item--wide {
+    grid-column: 1 / -1;
+  }
+
+  .photo-grid__img {
+    width: 100%;
+    height: 100%;
+    min-height: 240px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .photo-grid__item--wide .photo-grid__img {
+    min-height: 400px;
+  }
+
+  .photo-grid__empty {
+    text-align: center;
+    color: #6b7280;
+    padding: 64px 0;
+    margin-bottom: 48px;
+  }
+
+  .case-study__back {
+    display: flex;
+    justify-content: flex-start;
+  }
+
+  .btn-pill {
+    display: inline-block;
+    background: #4892be;
+    color: #fff;
+    text-decoration: none;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    padding: 12px 32px;
+    border-radius: 24px;
+    transition: background 140ms ease, transform 140ms ease;
+  }
+
+  .btn-pill:hover {
+    background: #3a7aa8;
+    transform: translateY(-1px);
+  }
+
+  @media (max-width: 768px) {
+    .photo-grid {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .photo-grid__item--wide {
+      grid-column: 1;
+    }
+
+    .photo-grid__img,
+    .photo-grid__item--wide .photo-grid__img {
+      min-height: unset;
+      aspect-ratio: 3/2;
+      height: auto;
+    }
+
+  }
+</style>
+
+<style is:global>
+  /* Scoped to case-study context to avoid conflicts with portfolio page */
+  .case-study .view-more-btn {
+    display: none;
+  }
+
+  @media (max-width: 768px) {
+    .case-study .view-more-btn {
+      display: flex;
+      margin: 16px auto 32px;
+      background: #4892be;
+      color: #fff;
+      border: none;
+      border-radius: 24px;
+      padding: 12px 36px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 140ms ease, transform 140ms ease;
+    }
+
+    .case-study .view-more-btn:hover {
+      background: #3a7aa8;
+      transform: translateY(-1px);
+    }
+  }
+</style>
+
+<script>
+  function setupCaseStudyMobile() {
+    if (window.innerWidth > 768) return;
+
+    const grid = document.querySelector<HTMLElement>('.photo-grid');
+    if (!grid) return;
+
+    // Remove any previously injected button on re-run
+    grid.parentElement?.querySelectorAll('.view-more-btn').forEach((b) => b.remove());
+
+    const items = Array.from(grid.querySelectorAll<HTMLElement>('.photo-grid__item'));
+    if (items.length <= 4) return;
+
+    items.forEach((item, i) => {
+      item.style.display = i >= 4 ? 'none' : '';
+    });
+
+    const btn = document.createElement('button');
+    btn.className = 'view-more-btn';
+    btn.textContent = 'VIEW MORE';
+    grid.after(btn);
+
+    btn.addEventListener('click', () => {
+      items.forEach((item) => (item.style.display = ''));
+      btn.remove();
+    });
+  }
+
+  document.addEventListener('astro:page-load', setupCaseStudyMobile);
+</script>

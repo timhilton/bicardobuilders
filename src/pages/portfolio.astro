@@ -1,0 +1,386 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+import { getStory, getStories } from '../lib/storyblok';
+
+const story = await getStory('portfolio');
+const content = story?.content;
+
+let regions: { name: string; projects: any[] }[] = [];
+
+if (content?.regions?.length) {
+  try {
+    const { useStoryblokApi } = await import('@storyblok/astro');
+    const storyblokApi = useStoryblokApi();
+    const { data } = await storyblokApi.get('cdn/stories/portfolio', {
+      version: 'published',
+      resolve_relations: 'region.projects',
+    });
+    const resolvedRegions = data?.story?.content?.regions ?? [];
+    regions = resolvedRegions.map((r: any) => ({
+      name: r.name ?? '',
+      projects: Array.isArray(r.projects) ? r.projects : [],
+    }));
+  } catch {
+    // fallback below
+  }
+}
+
+if (!regions.length) {
+  const projectStories = await getStories({ starts_with: 'projects/' });
+  if (projectStories.length) {
+    regions = [{ name: 'Our Work', projects: projectStories }];
+  }
+}
+
+const useFallback = regions.length === 0;
+const fallbackProjects = [
+  { title: 'Russian Hill Residence', slug: 'russian-hill' },
+  { title: 'Pacific Heights Remodel', slug: 'pacific-heights' },
+  { title: 'Noe Valley Addition', slug: 'noe-valley' },
+  { title: 'Cole Valley Kitchen', slug: 'cole-valley' },
+];
+
+function layoutClass(count: number): string {
+  if (count >= 4) return 'layout-full';
+  if (count === 3) return 'layout-3';
+  if (count === 2) return 'layout-2';
+  return 'layout-1';
+}
+
+function getSlug(project: any): string {
+  return '/' + (project.full_slug ?? project.slug ?? '');
+}
+
+function getThumbnail(project: any): string | null {
+  return project?.content?.thumbnail?.filename ?? null;
+}
+
+function getTitle(project: any): string {
+  return project?.content?.title ?? project?.name ?? 'Project';
+}
+---
+
+<PageLayout
+  title="Portfolio | Bicardo Builders Inc"
+  description="Explore our portfolio of custom homes, renovations, and additions across the San Francisco Bay Area."
+>
+  <div class="portfolio">
+    <div class="portfolio__inner">
+      <h1 class="portfolio__heading" transition:name="page-heading">PORTFOLIO</h1>
+
+      {useFallback ? (
+        <div class="region">
+          <h2 class="region__name">OUR WORK</h2>
+          <div class="project-grid layout-full">
+            {fallbackProjects.map((p, i) => (
+              <a href={`/portfolio/${p.slug}`} class:list={['project-card', i === 0 && 'hero']}>
+                <div class="img-wrap">
+                  <div class="img-placeholder" aria-hidden="true" />
+                </div>
+                <p class="card-title">{p.title}</p>
+              </a>
+            ))}
+          </div>
+        </div>
+      ) : (
+        regions.map((region) => {
+          const projects = region.projects;
+          const count = projects.length;
+          return (
+            <div class="region">
+              <h2 class="region__name">{region.name.toUpperCase()}</h2>
+              {count > 0 && (
+                <div class:list={['project-grid', layoutClass(count)]}>
+                  {projects.map((project: any, i: number) => {
+                    const thumb = getThumbnail(project);
+                    const title = getTitle(project);
+                    const isHero = i === 0 && count >= 4;
+                    return (
+                      <a href={getSlug(project)} class:list={['project-card', isHero && 'hero']}>
+                        <div class="img-wrap">
+                          {thumb ? (
+                            <img
+                              src={thumb}
+                              alt={project?.content?.thumbnail_alt ?? title}
+                              class="img"
+                              loading={i === 0 ? 'eager' : 'lazy'}
+                            />
+                          ) : (
+                            <div class="img-placeholder" aria-hidden="true" />
+                          )}
+                        </div>
+                        <p class="card-title">{title}</p>
+                      </a>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })
+      )}
+    </div>
+  </div>
+</PageLayout>
+
+<style>
+  .portfolio {
+    padding-bottom: 80px;
+  }
+
+  .portfolio__inner {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .portfolio__heading {
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #111827;
+    margin: 48px 0 40px;
+  }
+
+  .region {
+    margin-bottom: 64px;
+  }
+
+  .region__name {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #374151;
+    margin: 0 0 16px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #4892be;
+  }
+
+  /* ===== BASE CARD ===== */
+  .project-card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .project-card:hover {
+    opacity: 0.9;
+  }
+
+  .img-wrap {
+    width: 100%;
+    overflow: hidden;
+    background: #e5e7eb;
+  }
+
+  .img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 300ms ease;
+  }
+
+  .project-card:hover .img {
+    transform: scale(1.03);
+  }
+
+  .img-placeholder {
+    width: 100%;
+    height: 100%;
+    background: #d1d5db;
+  }
+
+  .card-title {
+    margin: 8px 0 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+    letter-spacing: 0.01em;
+  }
+
+  /* ===== LAYOUT: FULL (4+) ===== */
+  /* Hero: 16:9 full width. Tiles: 3-col 1:1 squares */
+  .layout-full {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .layout-full .hero {
+    grid-column: 1 / -1;
+  }
+
+  .layout-full .hero .img-wrap {
+    aspect-ratio: 16/9;
+  }
+
+  .layout-full .project-card:not(.hero) .img-wrap {
+    aspect-ratio: 1/1;
+  }
+
+  /* ===== LAYOUT: 3 ===== */
+  /* Left col: 1:1 spanning both rows. Right col: two 3:2 images stacked */
+  /* Column ratio 4:3 aligns a 1:1 left with two 3:2 rights (math: left_w = 4/7, right_w = 3/7, 2*(3/7*2/3) = 4/7) */
+  .layout-3 {
+    display: grid;
+    grid-template-columns: 4fr 3fr;
+    gap: 8px;
+  }
+
+  .layout-3 .project-card:nth-child(1) {
+    grid-row: span 2;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* img-wrap fills all flex space so image covers the full spanning height */
+  .layout-3 .project-card:nth-child(1) .img-wrap {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+  }
+
+  .layout-3 .project-card:nth-child(1) .img-wrap .img,
+  .layout-3 .project-card:nth-child(1) .img-wrap .img-placeholder {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .layout-3 .project-card:nth-child(2) .img-wrap,
+  .layout-3 .project-card:nth-child(3) .img-wrap {
+    aspect-ratio: 3/2;
+  }
+
+  /* ===== LAYOUT: 2 ===== */
+  /* Two 1:1 squares side by side */
+  .layout-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .layout-2 .project-card .img-wrap {
+    aspect-ratio: 1/1;
+  }
+
+  /* ===== LAYOUT: 1 ===== */
+  /* Single 1:1 square in the left column */
+  .layout-1 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .layout-1 .project-card .img-wrap {
+    aspect-ratio: 1/1;
+  }
+
+  /* ===== MOBILE ===== */
+  @media (max-width: 768px) {
+    /* All layouts collapse to a single full-width column */
+    .layout-full,
+    .layout-3,
+    .layout-2,
+    .layout-1 {
+      grid-template-columns: 1fr;
+    }
+
+    /* Reset spanning/positioning tricks */
+    .layout-full .hero,
+    .layout-3 .project-card:nth-child(1) {
+      grid-column: 1;
+      grid-row: auto;
+      display: block;
+    }
+
+    .layout-3 .project-card:nth-child(1) .img-wrap {
+      flex: unset;
+      position: static;
+      aspect-ratio: 3/2;
+    }
+
+    .layout-3 .project-card:nth-child(1) .img-wrap .img,
+    .layout-3 .project-card:nth-child(1) .img-wrap .img-placeholder {
+      position: static;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 3/2;
+      object-fit: cover;
+    }
+
+    /* Uniform image ratio on mobile */
+    .project-card .img-wrap {
+      aspect-ratio: 3/2 !important;
+      height: auto !important;
+    }
+
+  }
+</style>
+
+<style is:global>
+  /* VIEW MORE button — hidden on desktop, styled on mobile */
+  .view-more-btn {
+    display: none;
+  }
+
+  @media (max-width: 768px) {
+    .view-more-btn {
+      display: flex;
+      margin: 16px auto 0;
+      background: #4892be;
+      color: #fff;
+      border: none;
+      border-radius: 24px;
+      padding: 12px 36px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 140ms ease, transform 140ms ease;
+    }
+
+    .view-more-btn:hover {
+      background: #3a7aa8;
+      transform: translateY(-1px);
+    }
+  }
+</style>
+
+<script>
+  function setupPortfolioMobile() {
+    if (window.innerWidth > 768) return;
+
+    document.querySelectorAll<HTMLElement>('.region').forEach((region) => {
+      // Remove any previously injected buttons on re-run
+      region.querySelectorAll('.view-more-btn').forEach((b) => b.remove());
+
+      const cards = Array.from(region.querySelectorAll<HTMLElement>('.project-card'));
+      if (cards.length <= 2) return;
+
+      // Hide cards beyond the first 2
+      cards.forEach((card, i) => {
+        card.style.display = i >= 2 ? 'none' : '';
+      });
+
+      const btn = document.createElement('button');
+      btn.className = 'view-more-btn';
+      btn.textContent = 'VIEW MORE';
+      region.querySelector('.project-grid')?.after(btn);
+
+      btn.addEventListener('click', () => {
+        cards.forEach((card) => (card.style.display = ''));
+        btn.remove();
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', setupPortfolioMobile);
+</script>
