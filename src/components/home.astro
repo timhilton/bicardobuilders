@@ -1,91 +1,93 @@
 ---
 import logo from "../assets/BicardoBuilders.svg";
-import arrow from '../assets/arrowsvg.svg'
-import heroPhoto from "../assets/russian_hill_3_original.webp";
+import arrow from "../assets/arrowsvg.svg";
 import Image from "astro/components/Image.astro";
-import { getStory } from '../lib/storyblok';
+import { getStory } from "../lib/storyblok";
+import { renderRichText } from "@storyblok/astro";
 
-const story = await getStory('home');
+const story = await getStory("home");
 const content = story?.content;
 
-const tagline = content?.tagline ?? null;
-const ctaLabel = content?.cta_label ?? 'View our portfolio';
-const ctaUrl = content?.cta_url ?? '/portfolio';
-const heroImageUrl = content?.hero_image?.filename ?? null;
+// hero section content
+const tagline = renderRichText(content?.tagline);
+const ctaLabel = content?.cta_label;
+const ctaUrl = content?.cta_url;
+const heroImages: string[] = content?.hero_images
+  ?.map((img: any) => img.filename)
+  .filter(Boolean) ?? [content?.hero_image?.filename].filter(Boolean);
+
+  //services section content
+const servicesBlok = content?.services?.[0];
+const servicesCtaBlok = renderRichText(servicesBlok?.cta_blok);
+const servicesIntro = renderRichText(servicesBlok?.services_intro);
+const serviceItems: string[] = servicesBlok?.service_items?.split('\n').map((s: string) => s.trim()).filter(Boolean) ?? [];
+const servicesPhoto = servicesBlok?.services_image?.filename;
 ---
 
 <main class="main">
-	<!-- Mobile-only logo shown above the hero image -->
-	<div class="mobile-logo">
+	<section class="hero__content">
+		<div class="hero__gallery">
+			{heroImages.map((src, i) => (
+				<img
+				src={src}
+				alt=""
+				class:list={["hero__img", i === 0 && "is-active"]}
+				loading={i === 0 ? "eager" : "lazy"}
+				/>
+			))}
+		</div>
+
+		<div class="content__inner">
+			<!-- Mobile logo — hidden on desktop -->
 		<Image
-			transition:name="logo"
 			src={logo}
 			alt="Bicardo Builders Inc"
-			class="mobile-logo__img"
-			width={200}
-			height={68}
+			class="content__logo mobile-logo__img"
+			widths={[180]}
+			sizes="180px"
 			loading="eager"
 			decoding="async"
 		/>
+
+		<p class="content__copy" set:html={tagline}/>
+
+		<a class="content__cta" href={ctaUrl}>
+			<span class="cta__label">{ctaLabel}</span>
+			<Image
+				src={arrow}
+				alt=""
+				class="content__arrow"
+				loading="eager"
+				decoding="async"
+			/>
+		</a>
 	</div>
-
-	<section class="hero__media" aria-hidden="true">
-		{heroImageUrl ? (
-			<img
-				src={heroImageUrl}
-				alt=""
-				class="hero__img"
-				loading="eager"
-				decoding="async"
-			/>
-		) : (
-			<Image
-				src={heroPhoto}
-				alt=""
-				class="hero__img"
-				widths={[800, 1200, 1600, 2000]}
-				sizes="(min-width: 900px) 46vw, 100vw"
-				loading="eager"
-				decoding="async"
-			/>
-		)}
 	</section>
-
-	<section class="hero__content" aria-label="Intro">
-		<div class="content__inner">
-			<!-- Desktop logo — hidden on mobile -->
-			<Image
-				transition:name="logo"
-				src={logo}
-				alt="Bicardo Builders Inc"
-				class="content__logo"
-				widths={[320, 480, 640]}
-				sizes="(min-width: 900px) 26vw, 70vw"
-				loading="eager"
-				decoding="async"
-			/>
-
-			<p class="content__copy">
-				{tagline ? tagline : (
-					<>
-						With over <strong>20 years of building experience</strong>, we
-						craft spaces that reflect our clients' style and needs, built
-						with care, precision, and attention to every detail.
-					</>
-				)}
-			</p>
-
-			<a class="content__cta" href={ctaUrl}>
-				<span class="cta__label">{ctaLabel}</span>
-				<Image
-					src={arrow}
-					alt=""
-					class="content__arrow"
+	<section class="services">
+		<h2 class="services__heading">Services</h2>
+            <div class="services__copy" set:html={servicesIntro}></div>
+			<div class="services__image">
+					<img
+					src={servicesPhoto}
+					alt="service photo"
+					class="services__image"
 					loading="eager"
 					decoding="async"
 				/>
-			</a>
-		</div>
+			</div>
+			<div class="services__right">
+				<ul class="services__list">
+				  {serviceItems.map((item) => (
+					<li class="services__list-item">{item}</li>
+				  ))}
+				</ul>
+				<div class="services__cta-blok" set:html={servicesCtaBlok}></div>
+			</div>
+	</section>
+
+	<section class="contact-cta">
+		<h3 class="contact-cta__heading">Have a project in mind?</h3>
+		<a href="/contact" class="btn-pill">Get in touch</a>
 	</section>
 </main>
 
@@ -96,9 +98,7 @@ const heroImageUrl = content?.hero_image?.filename ?? null;
 
 	/* ===== MAIN GRID ===== */
 	.main {
-		min-height: 100svh;
-		display: grid;
-		grid-template-columns: repeat(24, minmax(0, 1fr));
+		grid-column: 1/-1;
 	}
 
 	/* Mobile logo hidden on desktop */
@@ -107,34 +107,54 @@ const heroImageUrl = content?.hero_image?.filename ?? null;
 	}
 
 	/* ===== HERO MEDIA ===== */
-	.hero__media {
-		grid-column: 1 / 12;
-		min-height: 100svh;
-		position: relative;
-		overflow: hidden;
-		background: #0b1220;
+	.hero__gallery {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100vh;
+		object-fit: cover;
 	}
 
 	.hero__img {
 		position: absolute;
 		inset: 0;
 		width: 100%;
-		height: 100%;
+		height: 100vh;
 		object-fit: cover;
+		opacity: 0;
+		transition: opacity 1.5s ease;
+	}
+
+	.hero__img.is-active {
+		opacity: 1;
 	}
 
 	/* ===== HERO CONTENT ===== */
 	.hero__content {
-		grid-column: 12 / -1;
 		display: grid;
+		grid-template-columns: repeat(12, 1fr);
+		width: 100%;
+		height: calc(100vh - 64px);
 		place-items: center;
-		padding: clamp(24px, 4vw, 64px);
-		background: #f6f7f9;
 	}
 
 	.content__inner {
-		width: min(560px, 100%);
+		grid-column: 1 / span 5;
+		margin-inline-start: 48px;
+		height: 500px
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		width: 100%;
 		text-align: center;
+		position: relative;
+		padding: 48px 36px;
+		border: 1px solid var(--color-brand-primary);
+		background-color: rgba(245, 245, 247, 0.5);
+		box-shadow: var(--shadow-image);
+		backdrop-filter: blur(24px);
+		box-sizing: border-box;
 	}
 
 	.content__logo {
@@ -167,7 +187,9 @@ const heroImageUrl = content?.hero_image?.filename ?? null;
 		padding: 10px 6px;
 		border-radius: 10px;
 		margin-inline-start: 92px;
-		transition: transform 140ms ease, background-color 140ms ease;
+		transition:
+			transform 140ms ease,
+			background-color 140ms ease;
 	}
 
 	.content__arrow {
@@ -178,85 +200,280 @@ const heroImageUrl = content?.hero_image?.filename ?? null;
 		transform: translateX(6px);
 	}
 
-	/* ===== MOBILE ===== */
-	@media (max-width: 899px) {
-		.main {
-			display: flex;
-			flex-direction: column;
-			min-height: 100svh;
-		}
+	/* ===== SERVICES SECTION ===== */
+  .services {
+	padding: 48px 0;
+	display: grid;
+	grid-template-columns: 5fr 48px 6fr;
+	grid-template-areas:
+		'heading . right'
+		'copy    . right'
+		'image   . right';
+		position: relative;
 
-		/* 1 — Mobile logo */
-		.mobile-logo {
-			display: flex;
-			justify-content: center;
-			padding: 32px 24px 24px;
-			background: #f6f7f9;
-			order: 1;
-		}
-
-		.mobile-logo__img {
-			width: 180px;
-			height: auto;
-		}
-
-		/* 2 — Hero photo */
-		.hero__media {
-			order: 2;
-			min-height: 56vw;
-			flex: 0 0 auto;
-		}
-
-		/* 3 — CTA + copy */
-		.hero__content {
-			order: 3;
-			padding: 32px 24px 40px;
-			place-items: start;
-		}
-
-		.content__inner {
-			width: 100%;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			text-align: center;
-		}
-
-		/* Desktop logo invisible on mobile */
-		.content__logo {
-			display: none;
-		}
-
-		/* CTA becomes teal pill, moves above copy */
-		.content__cta {
-			order: 1;
-			background: #4892be;
-			color: #fff;
-			border-radius: 24px;
-			padding: 13px 36px;
-			font-size: 15px;
-			font-weight: 600;
-			letter-spacing: 0.08em;
-			text-transform: uppercase;
-			gap: 0;
-			margin-inline-start: 0;
-			transition: background 140ms ease, transform 140ms ease;
-		}
-
-		.content__cta:hover {
-			background: #3a7aa8;
-			transform: translateY(-1px);
-		}
-
-		.content__arrow {
-			display: none;
-		}
-
-		/* Copy sits below the CTA */
-		.content__copy {
-			order: 2;
-			margin: 28px 0 0;
-			font-size: 16px;
-		}
+	&::after {
+		content: '';
+		position: absolute;
+		bottom: 0;
+		width: 100vw;
+		margin-inline-start: calc(50% - 50vw);
+		border-bottom: 1px solid var(--color-brand-secondary);
 	}
+  }
+
+  .services__copy {
+	color: #374151;
+	font-size: 16px;
+	letter-spacing: 0.025em;
+	}
+
+  .services__heading {
+	font-weight: 300;
+	font-family: 'Manrope', sans-serif;
+	color: var(--color-brand-primary);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	font-size: var(--text-xl);
+	margin: 0 0 24px;
+	grid-area: heading;
+  }
+
+  .services__copy,
+  .services__cta-blok {
+	color: var(--color-text-primary);
+	font-size: var(--text-md);
+	font-weight: 100;
+	line-height: 1.7;
+  }
+
+  .services__copy {
+	grid-area: copy;
+  }
+
+  .services__right {
+	grid-area: right;
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+  }
+
+  .services__cta-blok {
+	margin-top: 24px;
+}
+
+  .services__image {
+	grid-area: image;
+  }
+  .services__image img {
+	width: 100%;
+	height: auto;
+	object-fit: cover;
+	box-shadow: var(--shadow-image);
+  }
+.services__list {
+	font-weight: 100;
+	margin: 0;
+    padding: 0;
+    list-style: none;
+	width: 100%;
+}
+.services__list-item {
+	padding: 16px 24px;
+	border-bottom: 1px solid var(--color-brand-secondary);
+	font-size: var(--text-sm);
+	line-height: 1.7;
+	color: var(--color-text-primary);
+	box-shadow: var(--shadow-image);
+	text-transform: uppercase;
+	width: 100%;
+	box-sizing: border-box;
+	transition: transform 350ms ease-in-out;
+
+	&:hover {
+		transform: translateX(-16px);
+	}
+}
+
+.contact-cta {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.contact-cta__heading {
+	font-weight: 100;
+	font-family: 'Manrope', sans-serif;
+	color: var(--color-brand-primary);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	font-size: var(--text-xl);
+}
+
+	/* ===== MOBILE ===== */
+@media (max-width: 768px) {
+	.main {
+		display: flex;
+		flex-direction: column;
+		min-height: 100svh;
+	}
+
+	.mobile-logo {
+		display: flex;
+		justify-content: center;
+		padding: 32px 24px 24px;
+		background: #f6f7f9;
+	}
+
+	.mobile-logo__img {
+		width: 180px;
+		height: auto;
+	}
+
+	/* 2 — Hero photo */
+	.hero__gallery {
+		width: 100vw;
+		margin-inline-start: calc(50% + -50vw);
+		margin-top: 0;
+		position: relative;
+		aspect-ratio: 16/9;
+		overflow: hidden;
+		height: auto;
+	}
+
+	/* 3 — CTA + copy */
+	.hero__content {
+	/* padding: 32px 24px 40px; */
+		place-items: start;
+	}
+
+	.hero__img {
+		width: 100vw;
+		margin-inline-start: calc(50% + -50vw);
+		margin-top: 0;
+		max-height: 280px;
+		object-fit: cover;
+	}
+
+	.content__inner {
+		width: 100vw;
+		margin-inline-start: calc(50% - 50vw);
+		margin-top: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		border: none;
+		box-shadow: none;
+	}
+
+	/* Desktop logo invisible on mobile */
+	.content__logo {
+		/* display: none; */
+	}
+
+	/* CTA becomes teal pill, moves above copy */
+	.content__cta {
+		order: 1;
+		background: #4892be;
+		color: #fff;
+		border-radius: 24px;
+		padding: 13px 36px;
+		font-size: 15px;
+		font-weight: 100;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		gap: 0;
+		margin-inline-start: 0;
+		transition:
+			background 140ms ease,
+			transform 140ms ease;
+	}
+
+	.content__cta:hover {
+		background: #3a7aa8;
+		transform: translateY(-1px);
+	}
+
+	.content__arrow {
+		display: none;
+	}
+
+	/* Copy sits below the CTA */
+	.content__copy {
+		order: 2;
+		margin: 28px 0 0;
+		font-size: 16px;
+	}
+	.services {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+		width: 87.5%;
+		margin: 0 auto;
+		padding-top: 24px;
+		border-top: 1px solid var(--color-brand-secondary);
+	}
+
+	.services__heading {
+		margin-bottom: 0;
+	}
+	.services__image img {
+		width: 100vw;
+		margin-inline-start: calc(50% - 50vw);
+		height: auto;
+		aspect-ratio: 3/2;
+		object-fit: cover;
+		margin-bottom: 36px;
+	}
+
+	.services__list .services__list-item:hover {
+		transform: none;
+	}
+	.services__right {
+		width: 100%;
+	}
+	.hero__content {
+		display: flex;
+		flex-direction: column;
+		height: auto;
+	}
+
+	.contact-cta {
+		flex-direction: column;
+		gap: 12px;
+		text-align: center;
+		margin-bottom: 64px;
+	}
+
+	.contact-cta__heading {
+		font-size: var(--text-lg);
+	}
+}
 </style>
+<script>
+function initHeroGallery() {
+  const images = Array.from(
+    document.querySelectorAll<HTMLImageElement>(".hero__img")
+  );
+
+  if (images.length <= 1) return;
+
+  let current = 0;
+
+  setTimeout(() => {
+    // Reset after View Transitions has finished
+    images.forEach((img, i) => {
+      img.style.cssText = i === 0 ? "opacity: 1" : "opacity: 0";
+    });
+
+    setInterval(() => {
+      const next = (current + 1) % images.length;
+      images[current].style.opacity = "0";
+      images[next].style.opacity = "1";
+      current = next;
+    }, 5000);
+  }, 300);
+}
+
+document.addEventListener("astro:page-load", initHeroGallery);
+</script>

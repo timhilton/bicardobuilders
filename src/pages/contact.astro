@@ -1,18 +1,20 @@
 ---
-import PageLayout from '../layouts/PageLayout.astro';
-import { getStory } from '../lib/storyblok';
+import { renderRichText } from "@storyblok/astro";
+import PageLayout from "../layouts/PageLayout.astro";
+import { getStory } from "../lib/storyblok";
 
-const story = await getStory('contact');
+const story = await getStory("contact");
 const content = story?.content;
 
-const heading = content?.heading ?? 'CONTACT';
+const heading = content?.heading ?? "CONTACT";
 const heroImage = content?.hero_image?.filename ?? null;
-const phone = content?.phone ?? '(415) 555-0198';
-const address = content?.address ?? '123 Builder Way\nSan Francisco, CA 94110';
-const formNote = content?.form_note ?? 'Fill out the form below and we\'ll get back to you within one business day.';
-const hours = content?.hours ?? 'Monday – Friday: 7:00 AM – 5:00 PM\nSaturday: By appointment\nSunday: Closed';
-const addressLines: string[] = address.split('\n');
-const hoursLines: string[] = hours.split('\n');
+const phone = content?.phone ?? "(415) 555-0198";
+const formNote =
+  renderRichText(content?.form_note) ??
+  "Please allow 1 - 2 business days for us to reply";
+const hours =
+  renderRichText(content?.hours) ??
+  "Monday – Friday: 9:00 AM – 5:00 PM\nSaturday - Sunday: Closed";
 ---
 
 <PageLayout
@@ -24,44 +26,73 @@ const hoursLines: string[] = hours.split('\n');
       <h1 class="contact__heading" transition:name="page-heading">{heading}</h1>
     </div>
 
-    {heroImage ? (
-      <div class="contact__hero">
-        <img src={heroImage} alt="Bicardo Builders project" class="contact__hero-img" loading="lazy" />
-      </div>
-    ) : (
-      <div class="contact__hero contact__hero--placeholder" aria-hidden="true"></div>
-    )}
+    {
+      heroImage ? (
+        <div class="contact__hero">
+          <img
+            src={heroImage}
+            alt="Bicardo Builders project"
+            class="contact__hero-img"
+            loading="lazy"
+          />
+        </div>
+      ) : (
+        <div
+          class="contact__hero contact__hero--placeholder"
+          aria-hidden="true"
+        />
+      )
+    }
 
     <div class="contact__inner">
       <p class="contact__phone">
-        <a href={`tel:${phone.replace(/\D/g, '')}`}>{phone}</a>
+        <a href={`tel:${phone.replace(/\D/g, "")}`}>{phone}</a>
       </p>
-
-      <address class="contact__address">
-        {addressLines.map((line) => (
-          <span>{line}<br /></span>
-        ))}
-      </address>
 
       <section class="contact__form-section">
         <h2 class="contact__form-heading">Send us a message</h2>
-        <p class="contact__form-note">{formNote}</p>
+        <p class="contact__form-note" set:html={formNote}></p>
         <form class="contact__form" method="post" action="#" novalidate>
           <div class="form__group">
             <label class="form__label" for="name">Name</label>
-            <input class="form__input" id="name" name="name" type="text" autocomplete="name" required />
+            <input
+              class="form__input"
+              id="name"
+              name="name"
+              type="text"
+              autocomplete="name"
+              required
+            />
           </div>
           <div class="form__group">
             <label class="form__label" for="phone">Phone</label>
-            <input class="form__input" id="phone" name="phone" type="tel" autocomplete="tel" />
+            <input
+              class="form__input"
+              id="phone"
+              name="phone"
+              type="tel"
+              autocomplete="tel"
+            />
           </div>
           <div class="form__group">
             <label class="form__label" for="email">Email</label>
-            <input class="form__input" id="email" name="email" type="email" autocomplete="email" required />
+            <input
+              class="form__input"
+              id="email"
+              name="email"
+              type="email"
+              autocomplete="email"
+              required
+            />
           </div>
           <div class="form__group">
             <label class="form__label" for="message">Message</label>
-            <textarea class="form__textarea" id="message" name="message" rows="5" required></textarea>
+            <textarea
+              class="form__textarea"
+              id="message"
+              name="message"
+              rows="5"
+              required></textarea>
           </div>
           <div class="form__submit-wrap">
             <button class="btn-pill" type="submit">Send</button>
@@ -71,11 +102,7 @@ const hoursLines: string[] = hours.split('\n');
 
       <section class="contact__hours">
         <h2 class="contact__hours-heading">Hours of Operation</h2>
-        <ul class="contact__hours-list">
-          {hoursLines.map((line) => (
-            <li>{line}</li>
-          ))}
-        </ul>
+        <div class="contact__hours-list" set:html={hours}></div>
       </section>
     </div>
   </div>
@@ -84,6 +111,7 @@ const hoursLines: string[] = hours.split('\n');
 <style>
   .contact {
     padding-bottom: 80px;
+    grid-column: 1/-1;
   }
 
   .contact__inner {
@@ -94,40 +122,43 @@ const hoursLines: string[] = hours.split('\n');
 
   .contact__heading {
     font-size: clamp(28px, 4vw, 42px);
-    font-weight: 700;
+    font-weight: 300;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: #111827;
+    color: var(--color-brand-primary);
     margin: 48px 0 32px;
     text-align: center;
   }
 
   .contact__hero {
-    width: 100%;
+    width: 100vw;
+    margin-inline-start: calc(50% - 50vw);
     margin-bottom: 48px;
   }
 
   .contact__hero-img {
     width: 100%;
-    height: clamp(200px, 30vw, 360px);
+    height: 150px;
     object-fit: cover;
+    object-position: center 38%;
     display: block;
   }
 
   .contact__hero--placeholder {
-    height: clamp(200px, 30vw, 360px);
+    height: 150px;
     background: #d1d5db;
   }
 
   .contact__phone {
+    font-family: "Manrope", sans-serif;
     text-align: center;
-    font-size: clamp(22px, 3vw, 32px);
-    font-weight: 600;
+    font-size: 32px;
+    font-weight: 300;
     margin: 0 0 8px;
   }
 
   .contact__phone a {
-    color: #4892be;
+    color: var(--color-brand-primary);
     text-decoration: none;
   }
 
@@ -135,29 +166,25 @@ const hoursLines: string[] = hours.split('\n');
     text-decoration: underline;
   }
 
-  .contact__address {
-    text-align: center;
-    font-style: normal;
-    color: #374151;
-    font-size: 16px;
-    line-height: 1.7;
-    margin: 0 0 48px;
-  }
-
   .contact__form-section {
     margin-bottom: 56px;
   }
 
   .contact__form-heading {
-    font-size: 22px;
-    font-weight: 700;
-    color: #111827;
-    margin: 0 0 8px;
+    font-family: "Manrope", sans-serif;
+    text-align: center;
+    margin-top: 48px;
+    font-size: 32px;
+    font-weight: 300;
+    color: var(--color-brand-primary);
+    letter-spacing: var(--tracking-1);
   }
 
   .contact__form-note {
-    color: #374151;
-    font-size: 15px;
+    color: var(--color-text-primary);
+    text-align: center;
+    width: 100%;
+    font-size: 16px;
     margin: 0 0 24px;
   }
 
@@ -174,9 +201,9 @@ const hoursLines: string[] = hours.split('\n');
   }
 
   .form__label {
-    font-size: 14px;
-    font-weight: 600;
-    color: #374151;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--color-text-primary);
     letter-spacing: 0.02em;
   }
 
@@ -189,7 +216,9 @@ const hoursLines: string[] = hours.split('\n');
     font-family: inherit;
     color: #111827;
     background: #e8f3fa;
-    transition: border-color 140ms ease, background 140ms ease;
+    transition:
+      border-color 140ms ease,
+      background 140ms ease;
     width: 100%;
     box-sizing: border-box;
   }
@@ -209,23 +238,29 @@ const hoursLines: string[] = hours.split('\n');
   .form__submit-wrap {
     display: flex;
     justify-content: flex-start;
+    align-self: center;
   }
 
   .btn-pill {
     display: inline-block;
-    background: #4892be;
-    color: #fff;
+    background: var(--color-brand-secondary);
+    color: var(--color-surface-background);
+    box-shadow: var(--shadow-image);
     text-decoration: none;
-    font-size: 15px;
-    font-weight: 600;
+    font-family: "Manrope", sans-serif;
+    font-size: 24px;
+    font-weight: 300;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    padding: 12px 32px;
-    border-radius: 24px;
+    padding: 12px 54px;
+    border-radius: 50px;
+    margin-top: 24px;
     border: none;
     cursor: pointer;
     font-family: inherit;
-    transition: background 140ms ease, transform 140ms ease;
+    transition:
+      background 140ms ease,
+      transform 140ms ease;
   }
 
   .btn-pill:hover {
@@ -233,23 +268,20 @@ const hoursLines: string[] = hours.split('\n');
     transform: translateY(-1px);
   }
 
-  .contact__hours-heading {
-    font-size: 22px;
-    font-weight: 700;
-    color: #111827;
+  .contact__hours-heading,
+  .contact__hours-list {
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 34px;
+    color: var(--color-text-primary);
     margin: 0 0 16px;
+    text-align: center;
   }
 
   .contact__hours-list {
     list-style: none;
     padding: 0;
     margin: 0;
-  }
-
-  .contact__hours-list li {
-    color: #374151;
-    font-size: 16px;
-    line-height: 1.8;
   }
 
   @media (max-width: 768px) {

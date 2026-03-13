@@ -1,7 +1,7 @@
 ---
-import Layout from './Layout.astro';
-import Navigation from '../components/navigation.astro';
-import Footer from '../components/Footer.astro';
+import Layout from "./Layout.astro";
+import Navigation from "../components/navigation.astro";
+import Footer from "../components/Footer.astro";
 
 interface Props {
   title: string;
@@ -25,13 +25,25 @@ const { title, description, activePath = Astro.url.pathname } = Astro.props;
 <style>
   .page-wrapper {
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    background: #f9fafb;
+    width: 100%;
+    background: var(--color-background);
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
   }
 
   .page-main {
     flex: 1;
     width: 100%;
+    display: grid;
+    margin-top: 64px;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    grid-column: 2 / span 10;
   }
+
+  @media (max-width: 768px) {
+    .page-main {
+      margin-top: 46px;
+      grid-column: 1 / -1;
+    }
+   }
 </style>

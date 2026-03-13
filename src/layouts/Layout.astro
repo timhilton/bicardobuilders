@@ -38,8 +38,8 @@ const { title, description = "Default site description" } = Astro.props;
 		margin: 0;
 		width: 100%;
 		height: 100%;
-		display: flex;
 		flex-direction: column;
+		display: flex;
 	}
 
 	:global(body) {
@@ -54,8 +54,40 @@ const { title, description = "Default site description" } = Astro.props;
 			Helvetica,
 			Arial,
 			sans-serif;
-		color: #1f2937;
-		background: #ffffff;
+		color: var(--color-text-primary);
+		background: var(--color-surface-background);
+	}
+
+	:root {
+		/* Colors */
+		--color-text-primary: rgb(46, 46, 47);
+		--color-surface-background: rgb(245, 245, 247);
+		--color-surface-muted: rgb(213, 227, 235);
+		--color-brand-quaternary: #95cbd2;
+		--color-brand-tertiary: #97b9cd;
+		--color-brand-secondary: rgb(72, 146, 190);
+		--color-brand-primary: rgb(43, 94, 186);
+
+		/* Drop Shadow */
+		--shadow-image: 0px 8px 17px -11px #2e2e2f80;
+
+		/* Font Families */
+		--font-inter: "Inter", sans-serif;
+		--font-open-sans: "Open Sans", sans-serif;
+		--font-source-sans: "Source Sans 3", sans-serif;
+		--font-manrope: "Manrope", sans-serif;
+
+		/* Font Sizes */
+		--text-sm: 16px;
+		--text-md: 24px;
+		--text-lg: 32px;
+		--text-xl: 40px;
+
+		/* Letter Spacing */
+		--tracking-0: 0em;
+		--tracking-1: 0.03em;
+		--tracking-2: 0.05em;
+		--tracking-3: 0.07em;
 	}
 </style>
 
@@ -106,36 +138,85 @@ const { title, description = "Default site description" } = Astro.props;
 			}
 		}
 	}
+
+	@font-face {
+		font-family: "Manrope";
+		src: url("/fonts/Manrope-Regular.ttf") format("truetype");
+		font-weight: 400;
+		font-style: normal;
+	}
+
+	@font-face {
+		font-family: "Manrope";
+		src: url("/fonts/Manrope-Light.ttf") format("truetype");
+		font-weight: 300;
+		font-style: normal;
+	}
+
+	@font-face {
+		font-family: "Manrope";
+		src: url("/fonts/Manrope-ExtraLight.ttf") format("truetype");
+		font-weight: 200;
+		font-style: normal;
+	}
+	.btn-pill {
+		display: inline-block;
+		background: var(--color-brand-secondary);
+		color: var(--color-surface-background);
+		text-decoration: none;
+		font-size: 24px;
+		font-weight: 300;
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+		padding: 21px 81px 22px;
+		border-radius: 50px;
+		transition:
+			background 140ms ease,
+			transform 140ms ease;
+		box-shadow: var(--shadow-image);
+	}
+
+	.btn-pill:hover {
+		background: #3a7aa8;
+		transform: translateY(-1px);
+	}
 </style>
 
 <!-- Reveal images if JS is disabled -->
 <noscript>
-	<style>img { opacity: 1 !important; transform: none !important; }</style>
-</noscript>
+	<style>
+		img {
+			opacity: 1 !important;
+			transform: none !important;
+		}
+	</style></noscript
+>
 
 <script>
-	const IMG_SELECTOR = 'img:not(.nav-logo):not(.content__arrow)';
+	const IMG_SELECTOR = "img:not(.nav-logo):not(.content__arrow)";
 	const STAGGER_MS = 60;
 	const THRESHOLD = 0.4;
 
 	function setupImageAnimations() {
-		const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+		const reducedMotion = window.matchMedia(
+			"(prefers-reduced-motion: reduce)",
+		).matches;
 
 		const images = Array.from(
-			document.querySelectorAll<HTMLElement>(IMG_SELECTOR)
+			document.querySelectorAll<HTMLElement>(IMG_SELECTOR),
 		);
 
 		// Reset any previous run
 		images.forEach((img) => {
-			img.classList.remove('img-animate');
-			img.style.removeProperty('--img-delay');
+			img.classList.remove("img-animate");
+			img.style.removeProperty("--img-delay");
 		});
 
-		if (reducedMotion || window.location.pathname === '/') {
+		if (reducedMotion || window.location.pathname === "/") {
 			// Skip animation; make sure images are visible
 			images.forEach((img) => {
-				img.style.opacity = '1';
-				img.style.transform = 'none';
+				img.style.opacity = "1";
+				img.style.transform = "none";
 			});
 			return;
 		}
@@ -153,8 +234,8 @@ const { title, description = "Default site description" } = Astro.props;
 
 		// Stagger in-viewport images immediately
 		inView.forEach((img, i) => {
-			img.style.setProperty('--img-delay', `${i * STAGGER_MS}ms`);
-			img.classList.add('img-animate');
+			img.style.setProperty("--img-delay", `${i * STAGGER_MS}ms`);
+			img.classList.add("img-animate");
 		});
 
 		// Scroll-trigger out-of-viewport images at 40% visibility
@@ -162,17 +243,19 @@ const { title, description = "Default site description" } = Astro.props;
 			(entries) => {
 				entries.forEach((entry) => {
 					if (entry.isIntersecting) {
-						(entry.target as HTMLElement).classList.add('img-animate');
+						(entry.target as HTMLElement).classList.add(
+							"img-animate",
+						);
 						observer.unobserve(entry.target);
 					}
 				});
 			},
-			{ threshold: THRESHOLD }
+			{ threshold: THRESHOLD },
 		);
 
 		outOfView.forEach((img) => observer.observe(img));
 	}
 
 	// Initial page load + every view-transition navigation
-	document.addEventListener('astro:page-load', setupImageAnimations);
+	document.addEventListener("astro:page-load", setupImageAnimations);
 </script>

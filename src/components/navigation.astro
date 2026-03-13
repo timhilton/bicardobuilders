@@ -1,6 +1,7 @@
 ---
 import { Image } from "astro:assets";
 import logo from "../assets/BicardoBuilders.svg";
+import Logo from "./Logo.astro";
 
 interface LinkItem {
     label: string;
@@ -16,7 +17,6 @@ interface Props {
 const {
     links = [
         { label: "ABOUT", href: "/about" },
-        { label: "SERVICES", href: "/services" },
         { label: "PORTFOLIO", href: "/portfolio" },
         { label: "CONTACT", href: "/contact" },
     ],
@@ -32,64 +32,80 @@ const isActive = (href: string) =>
 ---
 
 <nav class="nav" aria-label="Primary">
-    <a href="/" class="nav__logo">
-        <Image
-            transition:name="logo"
-            class="nav-logo"
-            src={logo}
-            alt="Bicardo Builders Inc"
-            width={123}
-            height={42}
-            loading="eager"
-            decoding="async"
-        />
-    </a>
+    <div class="nav__inner">
+        <a href="/" class="nav__logo">
+            <Logo
+                width={123}
+                height={42}
+                color="#2b5eba"
+                transition:name="logo"
+            />
+        </a>
 
-    <button
-        class="nav__toggle"
-        aria-label="Open navigation"
-        aria-expanded="false"
-        aria-controls="nav-menu"
-    >
-        <span></span>
-        <span></span>
-        <span></span>
-    </button>
+        <button
+            class="nav__toggle"
+            aria-label="Open navigation"
+            aria-expanded="false"
+            aria-controls="nav-menu"
+        >
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
 
-    <ul id="nav-menu" class="nav__list" style={`justify-content:${justify}`}>
-        {
-            links.map((item) => (
-                <li class="nav__item">
-                    <a
-                        class:list={[
-                            "nav__link",
-                            isActive(item.href) && "nav__link--active",
-                        ]}
-                        href={item.href}
-                        aria-current={isActive(item.href) ? "page" : undefined}
-                    >
-                        {item.label}
-                    </a>
-                </li>
-            ))
-        }
-    </ul>
+        <ul
+            id="nav-menu"
+            class="nav__list"
+            style={`justify-content:${justify}`}
+        >
+            {
+                links.map((item) => (
+                    <li class="nav__item">
+                        <a
+                            class:list={[
+                                "nav__link",
+                                isActive(item.href) && "nav__link--active",
+                            ]}
+                            href={item.href}
+                            aria-current={
+                                isActive(item.href) ? "page" : undefined
+                            }
+                        >
+                            {item.label}
+                        </a>
+                    </li>
+                ))
+            }
+        </ul>
+    </div>
 </nav>
 
 <style>
     .nav {
+        position: fixed;
+        top: 0;
+        z-index: 50;
+        grid-column: 1 / -1;
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
         width: 100%;
-        max-width: 1200px;
+        border-bottom: var(--color-brand-primary) 1px solid;
+        background-color: rgba(245, 245, 247, 0.6);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        box-shadow: var(--shadow-image);
+        align-self: center;
+        height: 64px;
+        box-sizing: border-box;
+        flex-wrap: wrap;
+    }
+
+    .nav__inner {
+        width: 100%;
+        grid-column: 2 / span 10;
         display: flex;
         align-items: center;
         justify-content: space-between;
-        border-bottom: #4892be 1px solid;
-        align-self: center;
-        margin-top: 21px;
-        padding-bottom: 13px;
-        box-sizing: border-box;
-        padding-inline: 24px;
-        flex-wrap: wrap;
     }
 
     .nav-logo {
@@ -97,6 +113,10 @@ const isActive = (href: string) =>
         right: 0.07%;
         top: 0%;
         bottom: 0.19%;
+    }
+
+    svg {
+        fill: var(--color-text-primary);
     }
 
     .nav__list {
@@ -110,7 +130,7 @@ const isActive = (href: string) =>
 
     .nav__link {
         text-decoration: none;
-        color: #111827;
+        color: var(--color-text-primary);
         font-size: 16px;
         line-height: 1;
         letter-spacing: 0.08em;
@@ -132,9 +152,9 @@ const isActive = (href: string) =>
 
     .nav__link--active {
         text-decoration: underline;
-        text-underline-offset: 4px;
-        text-decoration-color: #4892be;
-        text-decoration-thickness: 2px;
+        text-underline-offset: 10px;
+        text-decoration-color: #2b5eba;
+        text-decoration-thickness: 1px;
     }
 
     /* Hamburger button — hidden on desktop */
@@ -145,9 +165,12 @@ const isActive = (href: string) =>
     /* ===== MOBILE ===== */
     @media (max-width: 768px) {
         .nav {
-            margin-top: 16px;
-            padding-bottom: 12px;
+            height: 64px;
             gap: 0;
+        }
+
+        .nav__list {
+            transition: height 220ms ease;
         }
 
         /* Hamburger visible on mobile */
@@ -169,7 +192,9 @@ const isActive = (href: string) =>
             height: 2px;
             background: #111827;
             border-radius: 2px;
-            transition: transform 220ms ease, opacity 220ms ease;
+            transition:
+                transform 220ms ease,
+                opacity 220ms ease;
         }
 
         /* Animate to X when open */
@@ -183,6 +208,10 @@ const isActive = (href: string) =>
             transform: translateY(-7px) rotate(-45deg);
         }
 
+        .nav__toggle[aria-expanded="true"] + .nav-menu {
+            height: auto;
+        }
+
         /* Nav list hidden by default, full-width row when open */
         .nav__list {
             display: none;
@@ -190,13 +219,22 @@ const isActive = (href: string) =>
             align-items: flex-start;
             gap: 0;
             width: 100%;
+            height: 0;
             padding: 8px 0 4px;
             margin-top: 12px;
             border-top: 1px solid #e5e7eb;
+            background-color: var(--color-surface-background);
+            transition: height 350ms ease-in-out;
         }
 
         .nav__list.is-open {
             display: flex;
+            flex-direction: column;
+            position: absolute;
+            top: 52px;
+            left: 0;
+            height: auto;
+            overflow: hidden;
         }
 
         .nav__item {
@@ -206,7 +244,7 @@ const isActive = (href: string) =>
         .nav__link {
             display: block;
             width: 100%;
-            padding: 13px 0;
+            padding: 13px 24px;
             border-bottom: 1px solid #f3f4f6;
             border-radius: 0;
             font-size: 15px;
@@ -221,25 +259,29 @@ const isActive = (href: string) =>
 
 <script>
     function initNav() {
-        const toggle = document.querySelector<HTMLButtonElement>('.nav__toggle');
-        const menu = document.querySelector<HTMLElement>('#nav-menu');
+        const toggle =
+            document.querySelector<HTMLButtonElement>(".nav__toggle");
+        const menu = document.querySelector<HTMLElement>("#nav-menu");
         if (!toggle || !menu) return;
 
         toggle.onclick = () => {
-            const open = menu.classList.toggle('is-open');
-            toggle.setAttribute('aria-expanded', String(open));
-            toggle.setAttribute('aria-label', open ? 'Close navigation' : 'Open navigation');
+            const open = menu.classList.toggle("is-open");
+            toggle.setAttribute("aria-expanded", String(open));
+            toggle.setAttribute(
+                "aria-label",
+                open ? "Close navigation" : "Open navigation",
+            );
         };
 
         // Close when a link is clicked
-        menu.querySelectorAll('.nav__link').forEach((link) => {
-            link.addEventListener('click', () => {
-                menu.classList.remove('is-open');
-                toggle.setAttribute('aria-expanded', 'false');
-                toggle.setAttribute('aria-label', 'Open navigation');
+        menu.querySelectorAll(".nav__link").forEach((link) => {
+            link.addEventListener("click", () => {
+                menu.classList.remove("is-open");
+                toggle.setAttribute("aria-expanded", "false");
+                toggle.setAttribute("aria-label", "Open navigation");
             });
         });
     }
 
-    document.addEventListener('astro:page-load', initNav);
+    document.addEventListener("astro:page-load", initNav);
 </script>

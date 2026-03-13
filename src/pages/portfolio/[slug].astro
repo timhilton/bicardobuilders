@@ -1,32 +1,26 @@
 ---
-import PageLayout from '../../layouts/PageLayout.astro';
-import { getStories } from '../../lib/storyblok';
-import { renderRichText } from '@storyblok/astro';
+import PageLayout from "../../layouts/PageLayout.astro";
+import { getStory } from "../../lib/storyblok";
+import { renderRichText } from "@storyblok/astro";
 
-export async function getStaticPaths() {
-  const stories = await getStories({ starts_with: 'projects/' });
+export const prerender = false;
 
-  // If no Storyblok token or no stories, return an empty array for static build
-  if (!stories.length) return [];
+const { slug } = Astro.params;
+const story = await getStory(`portfolio/${slug}`);
 
-  return stories.map((story: any) => ({
-    params: { slug: story.slug },
-    props: { story },
-  }));
-}
-
-const { story } = Astro.props as { story: any };
-
-if (!story) {
-  return Astro.redirect('/portfolio');
-}
+if (!story) return Astro.redirect("/portfolio");
 
 const content = story.content ?? {};
-const title: string = content.title ?? story.name ?? 'Project';
-const projectType: string = content.project_type ?? '';
-const year: string = content.year ?? '';
-const descriptionHtml: string | null = content.description ? renderRichText(content.description) : null;
-const images: any[] = content.images ?? [];
+const body = content.body ?? [];
+const project = body.find((b: any) => b.component === "project") ?? {};
+const photoRows = project.images ?? [];
+
+const title: string = project.title ?? story.name ?? "Project";
+const projectType: string = project.project_type ?? "";
+const year: string = project.year ?? "";
+const descriptionHtml: string | null = project.description
+  ? renderRichText(project.description)
+  : null;
 ---
 
 <PageLayout
@@ -36,74 +30,166 @@ const images: any[] = content.images ?? [];
 >
   <div class="case-study">
     <div class="case-study__inner">
-      <h1 class="case-study__title" transition:name="page-heading">{title.toUpperCase()}</h1>
-      {(projectType || year) && (
-        <p class="case-study__subtitle">
-          {[projectType, year].filter(Boolean).join(' • ')}
-        </p>
-      )}
+      <h1 class="case-study__title" transition:name="page-heading">
+        {title.toUpperCase()}
+      </h1>
 
-      {descriptionHtml && (
-        <div class="case-study__description" set:html={descriptionHtml} />
-      )}
+      {
+        (projectType || year) && (
+          <p class="case-study__subtitle">
+            {[projectType, year].filter(Boolean).join(" • ")}
+          </p>
+        )
+      }
 
-      {images.length > 0 ? (
-        <div class="photo-grid">
-          {images.map((img: any, i: number) => (
-            <div class:list={['photo-grid__item', i % 3 === 0 && 'photo-grid__item--wide']}>
-              <img
-                src={img.file?.filename}
-                alt={img.alt ?? title}
-                class="photo-grid__img"
-                loading={i < 2 ? 'eager' : 'lazy'}
-              />
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div class="photo-grid__empty">
-          <p>Photos coming soon.</p>
-        </div>
-      )}
+      {
+        descriptionHtml && (
+          <div class="case-study__description" set:html={descriptionHtml} />
+        )
+      }
+
+      {
+        photoRows.length > 0 ? (
+          <div class="photo-mosaic">
+            {photoRows.map((blok: any) => {
+              if (blok.component === "photo_row_pair") {
+                const classes =
+                  blok.layout?.[0] === "2-3" ? "" : "row-pair--reversed";
+                return (
+                  <div class={`row-pair ${classes}`}>
+                    {blok.image_left?.filename && (
+                      <div class="photo-container">
+                        <img
+                          src={blok.image_left.filename}
+                          alt={blok.image_left.alt || title}
+                          class="mosaic-img"
+                          data-lightbox-src={blok.image_left.filename}
+                          data-lightbox-alt={blok.image_left.alt || title}
+                        />
+                      </div>
+                    )}
+                    {blok.image_right?.filename && (
+                      <div class="photo-container">
+                        <img
+                          src={blok.image_right.filename}
+                          alt={blok.image_right.alt || title}
+                          class="mosaic-img"
+                          data-lightbox-src={blok.image_right.filename}
+                          data-lightbox-alt={blok.image_right.alt || title}
+                        />
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+
+              if (blok.component === "photo_row_feature") {
+                const reversed = blok.layout?.[0] === "feature-right";
+                return (
+                  <div
+                    class:list={[
+                      "row-feature",
+                      reversed && "row-feature--reversed",
+                    ]}
+                  >
+                    {blok.image_main?.filename && (
+                      <div class="photo-container">
+                        <img
+                          src={blok.image_main.filename}
+                          alt={blok.image_main.alt || title}
+                          class="mosaic-img"
+                          data-lightbox-src={blok.image_main.filename}
+                          data-lightbox-alt={blok.image_main.alt || title}
+                        />
+                      </div>
+                    )}
+                    <div class="feature-stack">
+                      {blok.image_top?.filename && (
+                        <div class="photo-container">
+                          <img
+                            src={blok.image_top.filename}
+                            alt={blok.image_top.alt || title}
+                            class="mosaic-img"
+                            data-lightbox-src={blok.image_top.filename}
+                            data-lightbox-alt={blok.image_top.alt || title}
+                          />
+                        </div>
+                      )}
+                      {blok.image_bottom?.filename && (
+                        <div class="photo-container">
+                          <img
+                            src={blok.image_bottom.filename}
+                            alt={blok.image_bottom.alt || title}
+                            class="mosaic-img"
+                            data-lightbox-src={blok.image_bottom.filename}
+                            data-lightbox-alt={blok.image_bottom.alt || title}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              }
+            })}
+          </div>
+        ) : (
+          <div class="photo-mosaic__empty">
+            <p>Photos coming soon.</p>
+          </div>
+        )
+      }
 
       <div class="case-study__back">
         <a href="/portfolio" class="btn-pill">← Back to Portfolio</a>
       </div>
     </div>
   </div>
+
+  <!-- Lightbox -->
+  <div id="lightbox-overlay"></div>
+  <div id="lightbox" aria-modal="true" role="dialog" aria-label="Image viewer">
+    <button id="lightbox-close" aria-label="Close">&times;</button>
+    <button id="lightbox-prev" aria-label="Previous"></button>
+    <div id="lightbox-img-wrap">
+      <img id="lightbox-img" src="" alt="" />
+    </div>
+    <button id="lightbox-next" aria-label="Next"></button>
+  </div>
 </PageLayout>
 
 <style>
   .case-study {
     padding-bottom: 80px;
+    grid-column: 1 / -1;
   }
 
   .case-study__inner {
-    max-width: 900px;
+    /* max-width: 960px; */
     margin: 0 auto;
-    padding: 0 24px;
   }
 
   .case-study__title {
     font-size: clamp(24px, 4vw, 38px);
-    font-weight: 700;
+    font-family: "Manrope", sans-serif;
+    font-weight: 300;
     letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: #111827;
+    color: var(--color-brand-primary);
     margin: 48px 0 8px;
   }
 
   .case-study__subtitle {
     font-size: 16px;
-    color: #4892be;
-    font-weight: 600;
+    color: var(--color-brand-secondary);
+    font-weight: 300;
+    text-transform: uppercase;
     margin: 0 0 32px;
     letter-spacing: 0.02em;
   }
 
   .case-study__description {
-    color: #374151;
+    color: var(--color-text-primary);
     font-size: 16px;
+    font-weight: 100;
     line-height: 1.7;
     margin-bottom: 40px;
   }
@@ -112,35 +198,139 @@ const images: any[] = content.images ?? [];
     margin: 0 0 16px;
   }
 
-  /* Masonry-style 2-col grid */
-  .photo-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
+  .photo-mosaic {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
     margin-bottom: 48px;
   }
 
-  .photo-grid__item {
+  .row-pair {
+    display: grid;
+    grid-template-columns: 2fr 3fr;
+    gap: 12px;
+
+    .photo-container {
+      overflow: hidden;
+
+      &:first-child {
+        aspect-ratio: 1/1;
+      }
+
+      &:last-child {
+        aspect-ratio: 3/2;
+      }
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        box-shadow: var(--shadow-image);
+      }
+    }
+  }
+
+  .row-pair.row-pair--reversed {
+    grid-template-columns: 3fr 2fr;
+
+    .photo-container {
+      overflow: hidden;
+
+      &:last-child {
+        aspect-ratio: 1/1;
+      }
+
+      &:first-child {
+        aspect-ratio: 3/2;
+      }
+    }
+  }
+
+  .row-feature,
+  .row-feature--reversed {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 12px;
+    align-items: stretch;
+
+    .photo-container {
+      aspect-ratio: 1/1;
+      overflow: hidden;
+      grid-column: 1 / span 7;
+
+      image: {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        box-shadow: var(--shadow-image);
+      }
+    }
+  }
+
+  .row-feature--reversed .photo-container {
+    grid-row: 1;
+    grid-column: 6 / -1;
+    min-width: 0;
+    gap: 12px;
+  }
+
+  .feature-stack {
+    display: grid;
+    grid-column: 8 / -1;
+    gap: 24px;
+    height: 100%;
+    align-items: stretch;
+    min-width: 0;
     overflow: hidden;
+
+    .photo-container {
+      grid-row: unset;
+      aspect-ratio: 3/2;
+      overflow: hidden;
+      min-width: 0;
+
+      image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        box-shadow: var(--shadow-image);
+      }
+    }
   }
 
-  .photo-grid__item--wide {
-    grid-column: 1 / -1;
+  .row-feature--reversed .feature-stack {
+    grid-row: 1;
+    grid-column: 1 / span 5;
+    align-items: stretch;
+    overflow: hidden;
+
+    .photo-container:first-child {
+      grid-row: 1;
+    }
+    .photo-container:last-child {
+      grid-row: 2;
+    }
   }
 
-  .photo-grid__img {
+  .mosaic-img {
     width: 100%;
     height: 100%;
-    min-height: 240px;
     object-fit: cover;
+    object-position: center;
     display: block;
+    cursor: pointer;
+    transition: opacity 140ms ease;
+    box-shadow: var(--shadow-image);
   }
 
-  .photo-grid__item--wide .photo-grid__img {
-    min-height: 400px;
+  .mosaic-img:hover {
+    opacity: 0.85;
   }
 
-  .photo-grid__empty {
+  .photo-mosaic__empty {
     text-align: center;
     color: #6b7280;
     padding: 64px 0;
@@ -153,101 +343,249 @@ const images: any[] = content.images ?? [];
   }
 
   .btn-pill {
-    display: inline-block;
-    background: #4892be;
-    color: #fff;
-    text-decoration: none;
     font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    padding: 12px 32px;
-    border-radius: 24px;
-    transition: background 140ms ease, transform 140ms ease;
+    padding: 14px 42px 15px;
   }
 
-  .btn-pill:hover {
-    background: #3a7aa8;
-    transform: translateY(-1px);
+  /* ── Lightbox ── */
+  #lightbox-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(46, 46, 47, 0.6);
+    backdrop-filter: blur(4px);
+    z-index: 900;
+    cursor: pointer;
+  }
+
+  #lightbox-overlay.is-open {
+    display: block;
+  }
+
+  #lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 901;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 80px;
+    box-sizing: border-box;
+    pointer-events: none;
+  }
+
+  #lightbox.is-open {
+    display: flex;
+  }
+
+  #lightbox-img-wrap {
+    max-width: 900px;
+    max-height: 90vh;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+  }
+
+  #lightbox-img {
+    max-width: 100%;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 8px 48px rgba(0, 0, 0, 0.6);
+    display: block;
+  }
+
+  #lightbox-close {
+    position: fixed;
+    top: 16px;
+    right: 24px;
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 44px;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.75;
+    transition: opacity 140ms ease;
+    pointer-events: auto;
+    z-index: 902;
+  }
+
+  #lightbox-close:hover {
+    opacity: 1;
+  }
+
+  #lightbox-prev,
+  #lightbox-next {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    font-size: 36px;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 140ms ease;
+    pointer-events: auto;
+    z-index: 902;
+  }
+
+  #lightbox-prev {
+    inset-inline-start: 5%;
+
+    &::after {
+      content: "<";
+      position: absolute;
+      inset-inline-start: -2px;
+      width: 100%;
+      height: 100%;
+      font-family: "Open Sans", sans-serif;
+      font-size: 36px;
+      font-weight: 100;
+      opacity: 1;
+      animation: pulse 1.5s infinite;
+    }
+  }
+  #lightbox-next {
+    inset-inline-end: 5%;
+
+    &::after {
+      content: ">";
+      position: absolute;
+      inset-inline-end: -2px;
+      width: 100%;
+      height: 100%;
+      font-family: "Open Sans", sans-serif;
+      font-size: 36px;
+      font-weight: 100;
+      opacity: 1;
+      animation: pulse 1.5s infinite;
+    }
+  }
+
+  #lightbox-prev:hover,
+  #lightbox-next:hover {
+    background: rgba(255, 255, 255, 0.25);
   }
 
   @media (max-width: 768px) {
-    .photo-grid {
-      grid-template-columns: 1fr;
-      gap: 8px;
+    .photo-mosaic {
+      display: flex;
+      gap: 12px;
     }
 
-    .photo-grid__item--wide {
-      grid-column: 1;
+    .row-pair,
+    .row-feature {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+
+      .photo-container {
+        aspect-ratio: unset;
+      }
     }
 
-    .photo-grid__img,
-    .photo-grid__item--wide .photo-grid__img {
-      min-height: unset;
+    .row-feature--reversed .feature-stack {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .feature-stack {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .mosaic-img {
       aspect-ratio: 3/2;
       height: auto;
     }
 
-  }
-</style>
-
-<style is:global>
-  /* Scoped to case-study context to avoid conflicts with portfolio page */
-  .case-study .view-more-btn {
-    display: none;
-  }
-
-  @media (max-width: 768px) {
-    .case-study .view-more-btn {
-      display: flex;
-      margin: 16px auto 32px;
-      background: #4892be;
-      color: #fff;
-      border: none;
-      border-radius: 24px;
-      padding: 12px 36px;
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      cursor: pointer;
-      font-family: inherit;
-      transition: background 140ms ease, transform 140ms ease;
+    #lightbox {
+      padding: 24px 12px;
     }
 
-    .case-study .view-more-btn:hover {
-      background: #3a7aa8;
-      transform: translateY(-1px);
+    #lightbox-prev {
+      left: 6px;
+    }
+    #lightbox-next {
+      right: 6px;
     }
   }
 </style>
 
 <script>
-  function setupCaseStudyMobile() {
-    if (window.innerWidth > 768) return;
+  function initLightbox() {
+    const lightbox = document.getElementById("lightbox")!;
+    const overlay = document.getElementById("lightbox-overlay")!;
+    const img = document.getElementById("lightbox-img") as HTMLImageElement;
+    const closeBtn = document.getElementById("lightbox-close")!;
+    const prevBtn = document.getElementById("lightbox-prev")!;
+    const nextBtn = document.getElementById("lightbox-next")!;
 
-    const grid = document.querySelector<HTMLElement>('.photo-grid');
-    if (!grid) return;
+    const images = Array.from(
+      document.querySelectorAll<HTMLImageElement>(
+        ".mosaic-img[data-lightbox-src]",
+      ),
+    ).map((el) => ({
+      src: el.dataset.lightboxSrc!,
+      alt: el.dataset.lightboxAlt ?? "",
+    }));
 
-    // Remove any previously injected button on re-run
-    grid.parentElement?.querySelectorAll('.view-more-btn').forEach((b) => b.remove());
+    let current = 0;
 
-    const items = Array.from(grid.querySelectorAll<HTMLElement>('.photo-grid__item'));
-    if (items.length <= 4) return;
+    function open(index: number) {
+      current = index;
+      img.src = images[current].src;
+      img.alt = images[current].alt;
+      lightbox.classList.add("is-open");
+      overlay.classList.add("is-open");
+      document.body.style.overflow = "hidden";
+    }
 
-    items.forEach((item, i) => {
-      item.style.display = i >= 4 ? 'none' : '';
-    });
+    function close() {
+      lightbox.classList.remove("is-open");
+      overlay.classList.remove("is-open");
+      document.body.style.overflow = "";
+    }
 
-    const btn = document.createElement('button');
-    btn.className = 'view-more-btn';
-    btn.textContent = 'VIEW MORE';
-    grid.after(btn);
+    function prev() {
+      current = (current - 1 + images.length) % images.length;
+      img.src = images[current].src;
+      img.alt = images[current].alt;
+    }
 
-    btn.addEventListener('click', () => {
-      items.forEach((item) => (item.style.display = ''));
-      btn.remove();
+    function next() {
+      current = (current + 1) % images.length;
+      img.src = images[current].src;
+      img.alt = images[current].alt;
+    }
+
+    document
+      .querySelectorAll<HTMLImageElement>(".mosaic-img[data-lightbox-src]")
+      .forEach((el, i) => {
+        el.addEventListener("click", () => open(i));
+      });
+
+    closeBtn.addEventListener("click", close);
+    overlay.addEventListener("click", close);
+    prevBtn.addEventListener("click", prev);
+    nextBtn.addEventListener("click", next);
+
+    document.addEventListener("keydown", (e) => {
+      if (!lightbox.classList.contains("is-open")) return;
+      if (e.key === "ArrowLeft") prev();
+      if (e.key === "ArrowRight") next();
+      if (e.key === "Escape") close();
     });
   }
 
-  document.addEventListener('astro:page-load', setupCaseStudyMobile);
+  document.addEventListener("astro:page-load", initLightbox);
 </script>
