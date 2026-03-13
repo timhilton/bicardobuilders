@@ -5,7 +5,7 @@ export async function getStory(slug: string): Promise<Record<string, any> | null
   if (!token) return null;
   try {
     const res = await fetch(
-      `https://api.storyblok.com/v2/cdn/stories/${slug}?version=draft&token=${token}`
+      `https://api.storyblok.com/v2/cdn/stories/${slug}?version=published&token=${token}`
     );
     const data = await res.json();
     return data?.story ?? null;
@@ -38,7 +38,7 @@ export async function getStoriesStatic(): Promise<any[]> {
   if (!token) return [];
   try {
     const res = await fetch(
-      `https://api.storyblok.com/v2/cdn/stories?starts_with=portfolio/&version=draft&token=${token}`
+      `https://api.storyblok.com/v2/cdn/stories?starts_with=portfolio/&version=published&token=${token}`
     );
     const data = await res.json();
     return data?.stories ?? [];
