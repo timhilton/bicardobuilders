@@ -38,28 +38,13 @@ const servicesPhoto = servicesBlok?.services_image?.filename;
 		</div>
 
 		<div class="content__inner">
-			<!-- Mobile logo — hidden on desktop -->
-		<Image
-			src={logo}
-			alt="Bicardo Builders Inc"
-			class="content__logo mobile-logo__img"
-			widths={[180]}
-			sizes="180px"
-			loading="eager"
-			decoding="async"
-		/>
+		<img src={logo.src} alt="Bicardo Builders Inc" class="content__logo mobile-logo__img" />
 
 		<p class="content__copy" set:html={tagline}/>
 
 		<a class="content__cta" href={ctaUrl}>
 			<span class="cta__label">{ctaLabel}</span>
-			<Image
-				src={arrow}
-				alt=""
-				class="content__arrow"
-				loading="eager"
-				decoding="async"
-			/>
+			<img src={arrow.src} alt="" class="content__arrow" />
 		</a>
 	</div>
 	</section>
