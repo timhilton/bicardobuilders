@@ -9,6 +9,7 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/netlify": "^5.5.4",
     "@storyblok/astro": "^7.3.9",
     "@vitejs/plugin-basic-ssl": "^2.1.4",
     "astro": "^5.16.15"

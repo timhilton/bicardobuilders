@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config';
 import { storyblok } from '@storyblok/astro';
 import basicSsl from '@vitejs/plugin-basic-ssl';
+import netlify from '@astrojs/netlify';
 
 // https://astro.build/config
 export default defineConfig({
@@ -15,4 +16,6 @@ export default defineConfig({
   vite: {
     plugins: [basicSsl()],
   },
+  adapter: netlify(),
+  output: 'server',
 });
