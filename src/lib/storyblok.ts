@@ -1,7 +1,7 @@
 import { useStoryblokApi } from '@storyblok/astro';
 
-const token = () => process.env.STORYBLOK_TOKEN ?? '';
-const version = process.env.NODE_ENV !== 'production' ? 'draft' : 'published';
+const token = () => import.meta.env.STORYBLOK_TOKEN ?? '';
+const version = import.meta.env.NODE_ENV !== 'production' ? 'draft' : 'published';
 
 export async function getStory(slug: string): Promise<Record<string, any> | null> {
   if (!token()) return null;

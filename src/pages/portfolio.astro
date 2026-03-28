@@ -1,8 +1,7 @@
 ---
 import PageLayout from "../layouts/PageLayout.astro";
-import { getStory, getStories, sbImage } from "../lib/storyblok";
+import { getStories, sbImage } from "../lib/storyblok";
 
-const story = await getStory("portfolio");
 const projectStories = await getStories({ starts_with: "portfolio/" });
 
 // Filter out the index story itself
@@ -80,12 +79,6 @@ function getTitle(project: any): string {
   return p?.title ?? project?.name ?? "Project";
 }
 
-function renderProjectCard(project: any, i: number, count: number) {
-  const thumb = getThumbnail(project);
-  const title = getTitle(project);
-  const isHero = i === 0 && count >= 4;
-  return { thumb, title, isHero };
-}
 ---
 
 <PageLayout
@@ -251,12 +244,6 @@ function renderProjectCard(project: any, i: number, count: number) {
     margin: 0 auto;
   }
 
-  .portfolio__heading {
-    visibility: hidden;
-    height: 0;
-    width: 0;
-  }
-
   .region {
     margin-bottom: 64px;
     width: 100%;
@@ -275,10 +262,10 @@ function renderProjectCard(project: any, i: number, count: number) {
 
   .region__name {
     font-size: 40px;
-    font-family: "Manrope", sans-serif;
+    font-family: var(--font-manrope);
     font-weight: 200;
     text-transform: uppercase;
-    color: #2b5eba;
+    color: var(--color-brand-primary);
     letter-spacing: 0.1em;
     margin: 0 0 16px;
   }
@@ -297,7 +284,7 @@ function renderProjectCard(project: any, i: number, count: number) {
   .img-wrap {
     width: 100%;
     overflow: hidden;
-    box-shadow: 0px 8px 17px -11px rgba(46, 46, 47, 0.5);
+    box-shadow: var(--shadow-image);
   }
 
   .img {
@@ -322,7 +309,7 @@ function renderProjectCard(project: any, i: number, count: number) {
     font-size: 14px;
     text-transform: uppercase;
     font-weight: 400;
-    color: #4892be;
+    color: var(--color-brand-secondary);
     letter-spacing: 0.08em;
   }
 
@@ -413,11 +400,23 @@ function renderProjectCard(project: any, i: number, count: number) {
       grid-template-columns: 1fr;
     }
 
+    .region {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+    }
+    .region__name {
+      grid-column: 2 / span 10;
+    }
+
+    .project-grid {
+      grid-column: 1 / -1;
+    }
+
     .layout-full .hero,
     .layout-3 .project-card:nth-child(1) {
       grid-column: 1;
       grid-row: auto;
-      display: block;
+      /* display: block; */
     }
 
     .layout-3 .project-card:nth-child(1) .img-wrap {
@@ -435,9 +434,19 @@ function renderProjectCard(project: any, i: number, count: number) {
       object-fit: cover;
     }
 
+    .project-card {
+      display: grid !important;
+      grid-template-columns: repeat(12, 1fr);
+    }
+
     .project-card .img-wrap {
+      grid-column: 1/-1;
       aspect-ratio: 3/2 !important;
       height: auto !important;
+    }
+
+    .card-title {
+      grid-column: 2 / span 10;
     }
   }
 </style>
@@ -450,8 +459,9 @@ function renderProjectCard(project: any, i: number, count: number) {
   @media (max-width: 768px) {
     .view-more-btn {
       display: flex;
+      grid-column: 1/-1;
       margin: 16px auto 0;
-      background: #4892be;
+      background: var(--color-brand-secondary);
       color: #fff;
       border: none;
       border-radius: 24px;
@@ -463,12 +473,12 @@ function renderProjectCard(project: any, i: number, count: number) {
       cursor: pointer;
       font-family: inherit;
       transition:
-        background 140ms ease,
-        transform 140ms ease;
+        background var(--transition-fast),
+        transform var(--transition-fast);
     }
 
     .view-more-btn:hover {
-      background: #3a7aa8;
+      background: var(--color-brand-secondary-hover);
       transform: translateY(-1px);
     }
   }
