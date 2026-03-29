@@ -1,0 +1,206 @@
+---
+import { getStory } from "../lib/storyblok";
+import { renderRichText } from "@storyblok/astro";
+import HeroCarousel from "./HeroCarousel.tsx";
+
+const story = await getStory("services");
+const content = story?.content;
+const servicesBlok = content?.body[0];
+
+const servicesCtaBlok = servicesBlok?.cta_blok
+	? renderRichText(servicesBlok.cta_blok)
+	: "";
+const servicesIntro = servicesBlok?.services_intro
+	? renderRichText(servicesBlok.services_intro)
+	: "";
+
+const serviceItems: string[] =
+	servicesBlok?.service_items
+		?.split("\n")
+		.map((s: string) => s.trim())
+		.filter(Boolean) ?? [];
+const servicesImages: string[] =
+	servicesBlok?.services_images
+		?.map((img: { filename: string }) => img.filename)
+		.filter(Boolean) ??
+	(servicesBlok?.services_image?.filename
+		? [servicesBlok.services_image.filename]
+		: []);
+---
+
+<section class="services" id="services">
+	<h2 class="services__heading">Services</h2>
+	<div class="services__copy" set:html={servicesIntro} />
+	<div class="services__image">
+		<HeroCarousel client:load images={servicesImages} showDotNav={true} className="services__carousel" />
+	</div>
+	<div class="services__right">
+		<ul class="services__list">
+			{
+				serviceItems.map((item) => (
+					<li class="services__list-item">{item}</li>
+				))
+			}
+		</ul>
+		<div class="services__cta-blok" set:html={servicesCtaBlok} />
+	</div>
+</section>
+
+<style>
+	.services {
+		grid-column: 1 / -1;
+		padding: 48px 0;
+		display: grid;
+		grid-template-columns: 5fr 48px 6fr;
+		grid-template-areas:
+			"heading . right"
+			"copy    . right"
+			"image   . right";
+		position: relative;
+
+		&::after {
+			content: "";
+			position: absolute;
+			bottom: 0;
+			width: 100vw;
+			margin-inline-start: calc(50% - 50vw);
+		}
+	}
+
+	.services__copy {
+		color: var(--color-text-secondary);
+		font-size: 16px;
+		letter-spacing: 0.025em;
+		margin: 0;
+
+		p {
+			margin-top: 0;
+		}
+	}
+
+	.services__heading {
+		font-weight: 300;
+		font-family: var(--font-manrope);
+		color: var(--color-brand-primary);
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		font-size: var(--text-xl);
+		grid-area: heading;
+		margin: 0;
+	}
+
+	.services__copy,
+	.services__cta-blok {
+		color: var(--color-text-primary);
+		font-size: var(--text-md);
+		font-weight: 100;
+		line-height: 1.7;
+	}
+
+	.services__copy {
+		grid-area: copy;
+	}
+
+	.services__right {
+		grid-area: right;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+	}
+
+	.services__cta-blok {
+		margin-top: 24px;
+	}
+
+	.services__image {
+		grid-area: image;
+		padding-bottom: 36px;
+	}
+
+	:global(.services__carousel) {
+		position: relative;
+		width: 100%;
+		aspect-ratio: 3 / 2;
+	}
+
+	:global(.services__carousel .hero__img) {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		opacity: 0;
+		transition: opacity 1.5s ease;
+		box-shadow: var(--shadow-image);
+	}
+
+	:global(.services__carousel .hero__dotnav) {
+		position: absolute;
+		bottom: -28px;
+		left: 50%;
+		transform: translateX(-50%);
+		display: flex;
+		align-items: center;
+		gap: 16px;
+	}
+
+	:global(.services__carousel .hero__dot) {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: var(--color-brand-secondary);
+		border: none;
+		padding: 0;
+		cursor: pointer;
+		opacity: 0.45;
+		transition: opacity 200ms ease, transform 200ms ease, width 200ms ease, height 200ms ease;
+	}
+
+	:global(.services__carousel .hero__dot:hover) {
+		opacity: 0.8;
+		transform: scale(1.25);
+	}
+
+	:global(.services__carousel .hero__dot--active) {
+		opacity: 1;
+		background: var(--color-brand-primary);
+	}
+	.services__list {
+		font-weight: 100;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		width: 100%;
+	}
+	.services__list-item {
+		padding: 16px 24px;
+		border-bottom: 1px solid var(--color-brand-secondary);
+		font-size: var(--text-sm);
+		line-height: 1.7;
+		color: var(--color-text-primary);
+		box-shadow: var(--shadow-image);
+		text-transform: uppercase;
+		width: 100%;
+		box-sizing: border-box;
+		transition: transform 350ms ease-in-out;
+
+		&:hover {
+			transform: translateX(-16px);
+		}
+	}
+
+	.contact-cta {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+	}
+
+	.contact-cta__heading {
+		font-weight: 100;
+		font-family: var(--font-manrope);
+		color: var(--color-brand-primary);
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		font-size: var(--text-xl);
+	}
+</style>

@@ -128,7 +128,7 @@ const { title, description = "Default site description" } = Astro.props;
 			transform: translateY(18px);
 		}
 
-		img:not(.nav-logo):not(.content__arrow).img-animate {
+		img:not(.nav-logo):not(.content__arrow):not(.hero__img).img-animate {
 			animation: img-fade-up 350ms ease-out both;
 			animation-delay: var(--img-delay, 0ms);
 		}
@@ -211,7 +211,7 @@ const { title, description = "Default site description" } = Astro.props;
 >
 
 <script>
-	const IMG_SELECTOR = "img:not(.nav-logo):not(.content__arrow)";
+	const IMG_SELECTOR = "img:not(.nav-logo):not(.content__arrow):not(.hero__img)";
 	const STAGGER_MS = 60;
 	const THRESHOLD = 0.4;
 

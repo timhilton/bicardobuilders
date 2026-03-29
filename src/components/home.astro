@@ -1,36 +1,28 @@
 ---
-import arrow from "../assets/arrowsvg.svg";
-import { getStory } from "../lib/storyblok";
 import { renderRichText } from "@storyblok/astro";
+import { getStory } from "../lib/storyblok";
+import HeroCarousel from "./HeroCarousel.tsx";
 
 const story = await getStory("home");
 const content = story?.content;
 
-// hero section content
-const tagline = renderRichText(content?.tagline);
-const ctaLabel = content?.cta_label;
-const ctaUrl = content?.cta_url;
 const heroImages: string[] = content?.hero_images
   ?.map((img: any) => img.filename)
   .filter(Boolean) ?? [content?.hero_image?.filename].filter(Boolean);
+
+const taglineHtml: string = content?.tagline ? (renderRichText(content.tagline) ?? '') : '';
+const ctaLabel: string = content?.cta_label ?? 'Portfolio';
 ---
 
-	<section class="hero__content">
-		<div class="hero__gallery">
-			{heroImages.map((src, i) => (
-				<img
-				src={src}
-				alt=""
-				class:list={["hero__img", i === 0 && "is-active"]}
-				loading={i === 0 ? "eager" : "lazy"}
-				/>
-			))}
-		</div>
-	</section>
-	<section class="contact-cta">
-		<h3 class="contact-cta__heading">Have a project in mind?</h3>
-		<a href="/contact" class="btn-pill">Get in touch</a>
-	</section>
+<section class="hero__content">
+	<HeroCarousel client:load images={heroImages} showDotNav={false} />
+</section>
+
+<div class="hero__tagline-row">
+	{taglineHtml && <div class="hero__tagline" set:html={taglineHtml} />}
+	<a href="/portfolio" class="btn-pill hero__cta-btn">{ctaLabel}</a>
+</div>
+<hr class="hero__keyline" />
 
 <style>
 	:global(:root) {
@@ -38,117 +30,85 @@ const heroImages: string[] = content?.hero_images
 	}
 
 	/* ===== HERO MEDIA ===== */
-	.hero__gallery {
+	:global(.hero__gallery) {
 		position: absolute;
 		inset: 0;
 		width: 100%;
-		height: 100vh;
+		height: 100%;
 		object-fit: cover;
 	}
 
-	.hero__img {
+	:global(.hero__img) {
 		position: absolute;
 		inset: 0;
 		width: 100%;
-		height: 100vh;
+		height: 100%;
 		object-fit: cover;
 		opacity: 0;
 		transition: opacity 1.5s ease;
 	}
 
-	.hero__img.is-active {
-		opacity: 1;
-	}
-
 	/* ===== HERO CONTENT ===== */
 	.hero__content {
-		display: grid;
-		grid-template-columns: repeat(12, 1fr);
-		width: 100%;
-		height: calc(100vh - 64px);
-		place-items: center;
-	}
-
-	.contact-cta {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		grid-row: 2;
+		position: relative;
 		grid-column: 1 / -1;
+		width: 100vw;
+		height: 100vh;
+		margin-top: -64px;
+		margin-inline-start: calc(50% - 50vw);
 	}
 
-	.contact-cta__heading {
-		font-weight: 100;
-		font-family: var(--font-manrope);
-		color: var(--color-brand-primary);
-		text-transform: uppercase;
-		letter-spacing: 0.05em;
-		font-size: var(--text-xl);
+	.hero__cta-btn {
+		font-size: 15px;
+		padding: 12px 32px;
+	}
+
+/* ===== TAGLINE ROW ===== */
+	.hero__tagline-row {
+		grid-column: 4 / span 6;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		gap: 64px;
+		padding-block: 64px;
+	}
+
+	.hero__tagline {
+		margin: 0;
+		font-size: 18px;
+		color: var(--color-text-primary);
+	}
+
+	.hero__keyline {
+		grid-column: 1 / -1;
+		border: none;
+		height: 1px;
+		background-color: var(--color-brand-primary);
+		margin: 0 0 16px;
+	}
+
+	.hero__tagline :global(p) {
+		margin: 0;
 	}
 
 	/* ===== MOBILE ===== */
 	@media (max-width: 768px) {
-		.hero__gallery {
-			width: 100vw;
-			margin-inline-start: calc(50% + -50vw);
-			margin-top: 0;
-			position: relative;
-			aspect-ratio: 16/9;
-			overflow: hidden;
-			height: auto;
-		}
-
 		.hero__content {
-			place-items: start;
-			display: flex;
-			flex-direction: column;
-			height: auto;
+			height: 60vw;
+			min-height: 280px;
+			margin-top: -46px;
 		}
 
-		.hero__img {
-			width: 100vw;
-			margin-inline-start: calc(50% + -50vw);
-			margin-top: 0;
-			max-height: 280px;
-			object-fit: cover;
+		.hero__cta-buttons {
+			bottom: 16px;
+			gap: 16px;
 		}
 
-		.contact-cta {
-			flex-direction: column;
-			gap: 12px;
-			text-align: center;
-			margin-bottom: 64px;
-		}
-
-		.contact-cta__heading {
-			font-size: var(--text-lg);
+		.hero__tagline-row {
+			grid-column: 1 / -1;
+			padding-inline: 24px;
 		}
 	}
 </style>
-<script>
-function initHeroGallery() {
-  const images = Array.from(
-    document.querySelectorAll<HTMLImageElement>(".hero__img")
-  );
 
-  if (images.length <= 1) return;
-
-  let current = 0;
-
-  setTimeout(() => {
-    // Reset after View Transitions has finished
-    images.forEach((img, i) => {
-      img.style.cssText = i === 0 ? "opacity: 1" : "opacity: 0";
-    });
-
-    setInterval(() => {
-      const next = (current + 1) % images.length;
-      images[current].style.opacity = "0";
-      images[next].style.opacity = "1";
-      current = next;
-    }, 5000);
-  }, 300);
-}
-
-document.addEventListener("astro:page-load", initHeroGallery);
-</script>

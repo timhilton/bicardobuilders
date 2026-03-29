@@ -1,0 +1,49 @@
+---
+---
+
+<section class="contact-cta">
+	<h3 class="contact-cta__heading">Have a project in mind?</h3>
+	<a href="/contact" class="btn-pill">Get in touch</a>
+</section>
+
+<style>
+	.contact-cta {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		grid-column: 1 / -1;
+		padding: 48px 0;
+		position: relative;
+
+		&::before {
+			content: "";
+			position: absolute;
+			top: 0;
+			width: 100vw;
+			margin-inline-start: calc(50% - 50vw);
+			border-top: 1px solid var(--color-brand-secondary);
+		}
+	}
+
+	.contact-cta__heading {
+		font-weight: 100;
+		font-family: var(--font-manrope);
+		color: var(--color-brand-primary);
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		font-size: var(--text-xl);
+	}
+
+	@media (max-width: 768px) {
+		.contact-cta {
+			flex-direction: column;
+			gap: 12px;
+			text-align: center;
+			margin-bottom: 64px;
+		}
+
+		.contact-cta__heading {
+			font-size: var(--text-lg);
+		}
+	}
+</style>

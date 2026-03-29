@@ -15,7 +15,7 @@ interface Props {
 const {
     links = [
         { label: "ABOUT", href: "/about" },
-        { label: "SERVICES", href: "/services"},
+        { label: "SERVICES", href: "/#services" },
         { label: "PORTFOLIO", href: "/portfolio" },
         { label: "CONTACT", href: "/contact" },
     ],
@@ -83,7 +83,7 @@ const isActive = (href: string) =>
     .nav {
         position: fixed;
         top: 0;
-        z-index: 50;
+        z-index: 9999;
         grid-column: 1 / -1;
         display: grid;
         grid-template-columns: repeat(12, 1fr);
@@ -272,12 +272,23 @@ const isActive = (href: string) =>
             );
         };
 
-        // Close when a link is clicked
+        // Close menu and handle hash scroll on link click
         menu.querySelectorAll(".nav__link").forEach((link) => {
-            link.addEventListener("click", () => {
+            link.addEventListener("click", (e) => {
                 menu.classList.remove("is-open");
                 toggle.setAttribute("aria-expanded", "false");
                 toggle.setAttribute("aria-label", "Open navigation");
+
+                const href = (link as HTMLAnchorElement).getAttribute("href") ?? "";
+                const hashMatch = href.match(/^(?:\/)?#(.+)$/);
+                if (hashMatch && window.location.pathname === "/") {
+                    e.preventDefault();
+                    const target = document.getElementById(hashMatch[1]);
+                    if (target) {
+                        const top = target.getBoundingClientRect().top + window.scrollY - 64;
+                        window.scrollTo({ top, behavior: "smooth" });
+                    }
+                }
             });
         });
     }
