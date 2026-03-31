@@ -16,8 +16,7 @@ const project = body.find((b: any) => b.component === "project") ?? {};
 const photoRows = project.images ?? [];
 
 const title: string = project.title ?? story.name ?? "Project";
-const projectType: string = project.project_type ?? "";
-const year: string = project.year ?? "";
+const services: string[] = project.services ?? [];
 const descriptionHtml: string | null = project.description
   ? renderRichText(project.description)
   : null;
@@ -25,7 +24,7 @@ const descriptionHtml: string | null = project.description
 
 <PageLayout
   title={`${title} | Bicardo Builders Inc`}
-  description={`${title} — ${projectType} ${year}`.trim()}
+  description={title}
   activePath="/portfolio"
 >
   <div class="case-study">
@@ -35,10 +34,12 @@ const descriptionHtml: string | null = project.description
       </h1>
 
       {
-        (projectType || year) && (
-          <p class="case-study__subtitle">
-            {[projectType, year].filter(Boolean).join(" • ")}
-          </p>
+        services.length > 0 && (
+          <ul class="case-study__services">
+            {services.map((s: string) => (
+              <li class="service-pill">{s}</li>
+            ))}
+          </ul>
         )
       }
 
@@ -177,13 +178,24 @@ const descriptionHtml: string | null = project.description
     margin: 48px 0 8px;
   }
 
-  .case-study__subtitle {
-    font-size: 16px;
-    color: var(--color-brand-secondary);
-    font-weight: 300;
-    text-transform: uppercase;
+  .case-study__services {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    list-style: none;
     margin: 0 0 32px;
-    letter-spacing: 0.02em;
+    padding: 0;
+  }
+
+  .service-pill {
+    font-size: 13px;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--color-brand-secondary);
+    border: 1px solid var(--color-brand-secondary);
+    border-radius: 24px;
+    padding: 4px 16px;
   }
 
   .case-study__description {
