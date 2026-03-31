@@ -276,4 +276,19 @@ const { title, description = "Default site description" } = Astro.props;
 
 	// Initial page load + every view-transition navigation
 	document.addEventListener("astro:page-load", setupImageAnimations);
+
+	function handlePendingScroll() {
+		const target = sessionStorage.getItem("pendingScrollTo");
+		if (target && window.location.pathname === "/") {
+			sessionStorage.removeItem("pendingScrollTo");
+			setTimeout(() => {
+				const el = document.getElementById(target);
+				if (el) {
+					window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 64, behavior: "smooth" });
+				}
+			}, 400);
+		}
+	}
+
+	document.addEventListener("astro:page-load", handlePendingScroll);
 </script>
