@@ -89,13 +89,17 @@ const ctaUrl = content?.cta_url;
   }
 
   @media (max-width: 768px) {
-    .about__hero,
-    .about__hero--placeholder {
-      display: none;
-    }
-
     .about__heading {
       margin: 32px 0 24px;
+    }
+
+    .about__hero {
+      margin-bottom: 24px;
+    }
+
+    .about__inner {
+      width: calc(10 / 12 * 100%);
+      margin-inline: auto;
     }
   }
 
