@@ -189,6 +189,38 @@ const servicesImages: string[] =
 		}
 	}
 
+	@media (max-width: 768px) {
+		.services {
+			grid-template-columns: 1fr;
+			grid-template-areas:
+				"heading"
+				"copy"
+				"image"
+				"right";
+		}
+
+		.services__image {
+			width: 100vw;
+			margin-inline-start: calc(50% - 50vw);
+		}
+
+		.services__heading,
+		.services__copy,
+		.services__right {
+			width: calc(10 / 12 * 100%);
+			margin-inline: auto;
+		}
+
+		.services__copy {
+			margin-top: 24px;
+			margin-bottom: 24px;
+		}
+
+		.services__right {
+			margin-top: 24px;
+		}
+	}
+
 	.contact-cta {
 		display: flex;
 		justify-content: space-between;

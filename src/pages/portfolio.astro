@@ -440,6 +440,10 @@ function getTitle(project: any): string {
       grid-template-columns: repeat(12, 1fr);
     }
 
+    .project-card--hidden {
+      display: none !important;
+    }
+
     .project-card .img-wrap {
       grid-column: 1/-1;
       aspect-ratio: 3/2 !important;
@@ -498,7 +502,7 @@ function getTitle(project: any): string {
       if (cards.length <= 2) return;
 
       cards.forEach((card, i) => {
-        card.style.display = i >= 2 ? "none" : "";
+        card.classList.toggle("project-card--hidden", i >= 2);
       });
 
       const btn = document.createElement("button");
@@ -507,7 +511,7 @@ function getTitle(project: any): string {
       region.querySelector(".project-grid")?.after(btn);
 
       btn.addEventListener("click", () => {
-        cards.forEach((card) => (card.style.display = ""));
+        cards.forEach((card) => card.classList.remove("project-card--hidden"));
         btn.remove();
       });
     });

@@ -17,9 +17,9 @@ const photoRows = project.images ?? [];
 
 const title: string = project.title ?? story.name ?? "Project";
 const services: string[] = project.services ?? [];
-const descriptionHtml: string | null = project.description
-  ? renderRichText(project.description)
-  : null;
+const rawHtml = project.description ? renderRichText(project.description) : null;
+const descriptionHtml: string | null =
+  rawHtml && rawHtml.replace(/<[^>]*>/g, "").trim() ? rawHtml : null;
 ---
 
 <PageLayout
@@ -489,9 +489,44 @@ const descriptionHtml: string | null = project.description
   }
 
   @media (max-width: 768px) {
+    .case-study__inner {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+    }
+
+    .case-study__title,
+    .case-study__services {
+      grid-column: 2 / span 10;
+    }
+
+    .case-study__back {
+      grid-column: 2 / span 10;
+      justify-content: center;
+    }
+
+    .case-study__description,
+    .photo-mosaic,
+    .photo-mosaic__empty {
+      grid-column: 1 / -1;
+    }
+
+    .case-study__description {
+      margin-bottom: 0;
+    }
+
+    .case-study__title {
+      margin-top: 24px;
+      margin-bottom: 12px;
+    }
+    .case-study__services {
+      margin-bottom: 0;
+    }
+
     .photo-mosaic {
       display: flex;
       gap: 12px;
+      margin-top: 24px;
+      margin-bottom: 24px;
     }
 
     .row-pair,
