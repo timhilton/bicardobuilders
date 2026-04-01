@@ -32,7 +32,7 @@ const servicesImages: string[] =
 	<h2 class="services__heading">Services</h2>
 	<div class="services__copy" set:html={servicesIntro} />
 	<div class="services__image">
-		<HeroCarousel client:load images={servicesImages} showDotNav={true} className="services__carousel" />
+		<HeroCarousel client:load images={servicesImages} showDotNav={true} className="services__carousel" swipeable={true} />
 	</div>
 	<div class="services__right">
 		<ul class="services__list">

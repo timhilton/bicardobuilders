@@ -4,11 +4,13 @@ interface Props {
 	images: string[];
 	showDotNav?: boolean;
 	className?: string;
+	swipeable?: boolean;
 }
 
-export default function HeroCarousel({ images, showDotNav = false, className = 'hero__gallery' }: Props) {
+export default function HeroCarousel({ images, showDotNav = false, className = 'hero__gallery', swipeable = false }: Props) {
 	const [current, setCurrent] = useState(0);
 	const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+	const touchStartX = useRef<number | null>(null);
 
 	useEffect(() => {
 		if (images.length <= 1) return;
@@ -38,6 +40,21 @@ export default function HeroCarousel({ images, showDotNav = false, className = '
 		return 8;
 	};
 
+	const handleTouchStart = (e: React.TouchEvent) => {
+		touchStartX.current = e.touches[0].clientX;
+	};
+
+	const handleTouchEnd = (e: React.TouchEvent) => {
+		if (touchStartX.current === null) return;
+		const delta = touchStartX.current - e.changedTouches[0].clientX;
+		touchStartX.current = null;
+		if (Math.abs(delta) < 50) return;
+		goTo(delta > 0
+			? (current + 1) % images.length
+			: (current - 1 + images.length) % images.length
+		);
+	};
+
 	const goTo = (index: number) => {
 		setCurrent(index);
 		if (intervalRef.current) clearInterval(intervalRef.current);
@@ -47,7 +64,10 @@ export default function HeroCarousel({ images, showDotNav = false, className = '
 	};
 
 	return (
-		<div className={className}>
+		<div
+			className={className}
+			{...(swipeable && { onTouchStart: handleTouchStart, onTouchEnd: handleTouchEnd })}
+		>
 			{images.map((src, i) => (
 				<img
 					key={src}

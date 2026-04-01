@@ -36,8 +36,8 @@ const descriptionHtml: string | null =
       {
         services.length > 0 && (
           <ul class="case-study__services">
-            {services.map((s: string) => (
-              <li class="service-pill">{s}</li>
+            {services.map((s: string, i: number) => (
+              <li class="service-pill" style={`animation-delay: ${i * 120}ms`}>{s}</li>
             ))}
           </ul>
         )
@@ -169,6 +169,17 @@ const descriptionHtml: string | null =
     margin: 0 auto;
   }
 
+  @keyframes title-in {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   .case-study__title {
     font-size: clamp(24px, 4vw, 38px);
     font-family: var(--font-manrope);
@@ -176,6 +187,7 @@ const descriptionHtml: string | null =
     letter-spacing: 0.05em;
     color: var(--color-brand-primary);
     margin: 48px 0 8px;
+    animation: title-in 900ms ease-in-out both;
   }
 
   .case-study__services {
@@ -187,6 +199,17 @@ const descriptionHtml: string | null =
     padding: 0;
   }
 
+  @keyframes pill-in {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   .service-pill {
     font-size: 13px;
     font-weight: 400;
@@ -196,6 +219,8 @@ const descriptionHtml: string | null =
     border: 1px solid var(--color-brand-secondary);
     border-radius: 24px;
     padding: 4px 16px;
+    opacity: 0;
+    animation: pill-in 1000ms ease-in-out forwards;
   }
 
   .case-study__description {
@@ -338,6 +363,11 @@ const descriptionHtml: string | null =
     box-shadow: var(--shadow-image);
   }
 
+  :global(.mosaic-img.img-animate) {
+    animation-duration: 900ms;
+    animation-timing-function: ease-in-out;
+  }
+
   .mosaic-img:hover {
     opacity: 0.85;
   }
@@ -366,7 +396,7 @@ const descriptionHtml: string | null =
     inset: 0;
     background: rgba(46, 46, 47, 0.6);
     backdrop-filter: blur(4px);
-    z-index: 900;
+    z-index: 10000;
     cursor: pointer;
   }
 
@@ -378,7 +408,7 @@ const descriptionHtml: string | null =
     display: none;
     position: fixed;
     inset: 0;
-    z-index: 901;
+    z-index: 10001;
     align-items: center;
     justify-content: center;
     padding: 24px 80px;
@@ -422,7 +452,7 @@ const descriptionHtml: string | null =
     opacity: 0.75;
     transition: opacity 140ms ease;
     pointer-events: auto;
-    z-index: 902;
+    z-index: 10002;
   }
 
   #lightbox-close:hover {
@@ -447,7 +477,7 @@ const descriptionHtml: string | null =
     justify-content: center;
     transition: background 140ms ease;
     pointer-events: auto;
-    z-index: 902;
+    z-index: 10002;
   }
 
   #lightbox-prev {
@@ -595,12 +625,14 @@ const descriptionHtml: string | null =
       lightbox.classList.add("is-open");
       overlay.classList.add("is-open");
       document.body.style.overflow = "hidden";
+      document.body.classList.add("lightbox-open");
     }
 
     function close() {
       lightbox.classList.remove("is-open");
       overlay.classList.remove("is-open");
       document.body.style.overflow = "";
+      document.body.classList.remove("lightbox-open");
     }
 
     function prev() {
@@ -632,6 +664,18 @@ const descriptionHtml: string | null =
       if (e.key === "ArrowRight") next();
       if (e.key === "Escape") close();
     });
+
+    let touchStartX: number | null = null;
+    lightbox.addEventListener("touchstart", (e) => {
+      touchStartX = e.touches[0].clientX;
+    }, { passive: true });
+    lightbox.addEventListener("touchend", (e) => {
+      if (touchStartX === null) return;
+      const delta = touchStartX - e.changedTouches[0].clientX;
+      touchStartX = null;
+      if (Math.abs(delta) < 50) return;
+      delta > 0 ? next() : prev();
+    }, { passive: true });
   }
 
   document.addEventListener("astro:page-load", initLightbox);

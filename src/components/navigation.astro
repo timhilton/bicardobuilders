@@ -80,6 +80,10 @@ const isActive = (href: string) =>
 </nav>
 
 <style>
+    :global(body.lightbox-open) .nav {
+        z-index: 0;
+    }
+
     .nav {
         position: fixed;
         top: 0;
