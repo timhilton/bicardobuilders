@@ -3,7 +3,15 @@ import Home from '../components/home.astro';
 import Services from '../components/Services.astro';
 import ContactCta from '../components/ContactCta.astro';
 import PageLayout from '../layouts/PageLayout.astro';
+import Logo from '../components/Logo.astro';
 ---
+
+<div id="splash-overlay" aria-hidden="true">
+	<div id="splash-bg"></div>
+	<div id="splash-logo" style="opacity:0">
+		<Logo width={384} height={122} color="#2b5eba" />
+	</div>
+</div>
 
 <PageLayout
 	title="Bicardo Builders Inc"
@@ -13,3 +21,85 @@ import PageLayout from '../layouts/PageLayout.astro';
 	<Services />
 	<ContactCta />
 </PageLayout>
+
+<style>
+	#splash-overlay {
+		position: fixed;
+		inset: 0;
+		z-index: 20000;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	#splash-bg {
+		position: absolute;
+		inset: 0;
+		background: var(--color-surface-background);
+	}
+
+	#splash-logo {
+		position: relative;
+		transition: opacity 800ms ease-in-out;
+	}
+</style>
+
+<script>
+	function initSplash(): void {
+		const overlay = document.getElementById('splash-overlay') as HTMLElement | null;
+		const splashBg = document.getElementById('splash-bg') as HTMLElement | null;
+		const splashLogo = document.getElementById('splash-logo') as HTMLElement | null;
+		const navLogo = document.querySelector<HTMLElement>('.nav__logo');
+		if (!overlay || !splashBg || !splashLogo) return;
+
+		if (sessionStorage.getItem('introSeen')) {
+			overlay.style.display = 'none';
+			return;
+		}
+		sessionStorage.setItem('introSeen', 'true');
+
+		// Phase 1: fade logo in
+		requestAnimationFrame(() => {
+			splashLogo.style.opacity = '1';
+		});
+
+		// Phase 2: move logo to nav, fade background only
+		setTimeout(() => {
+			const splashRect = splashLogo.getBoundingClientRect();
+			const navRect = navLogo?.getBoundingClientRect();
+
+			if (navRect) {
+				const splashCx = splashRect.left + splashRect.width / 2;
+				const splashCy = splashRect.top + splashRect.height / 2;
+				const navCx = navRect.left + navRect.width / 2;
+				const navCy = navRect.top + navRect.height / 2;
+				const tx = navCx - splashCx;
+				const ty = navCy - splashCy;
+				const scale = navRect.width / splashRect.width;
+
+				// Hide nav logo — splash logo takes its place during the move
+				if (navLogo) navLogo.style.opacity = '0';
+
+				// Move splash logo to nav position (no opacity change — stays fully visible)
+				splashLogo.style.transition = 'transform 600ms ease-in-out';
+				splashLogo.style.transform = `translate(${tx}px, ${ty}px) scale(${scale})`;
+
+				// Fade only the background, not the logo
+				splashBg.style.transition = 'opacity 600ms ease-in-out';
+				splashBg.style.opacity = '0';
+
+				// Seamless swap: show nav logo, remove overlay
+				setTimeout(() => {
+					if (navLogo) navLogo.style.opacity = '1';
+					overlay.style.display = 'none';
+				}, 620);
+			} else {
+				splashBg.style.transition = 'opacity 600ms ease-in-out';
+				splashBg.style.opacity = '0';
+				setTimeout(() => { overlay.style.display = 'none'; }, 620);
+			}
+		}, 1800);
+	}
+
+	document.addEventListener('astro:page-load', initSplash);
+</script>
