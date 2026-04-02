@@ -29,25 +29,6 @@ const ctaLabel: string = content?.cta_label ?? 'Portfolio';
 		color-scheme: light;
 	}
 
-	/* ===== HERO MEDIA ===== */
-	:global(.hero__gallery) {
-		position: absolute;
-		inset: 0;
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-	}
-
-	:global(.hero__img) {
-		position: absolute;
-		inset: 0;
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		opacity: 0;
-		transition: opacity 1.5s ease;
-	}
-
 	/* ===== HERO CONTENT ===== */
 	.hero__content {
 		position: relative;
@@ -58,10 +39,6 @@ const ctaLabel: string = content?.cta_label ?? 'Portfolio';
 		margin-inline-start: calc(50% - 50vw);
 	}
 
-	.hero__cta-btn {
-		font-size: 15px;
-		padding: 12px 32px;
-	}
 
 /* ===== TAGLINE ROW ===== */
 	.hero__tagline-row {
@@ -108,6 +85,11 @@ const ctaLabel: string = content?.cta_label ?? 'Portfolio';
 		.hero__tagline-row {
 			grid-column: 1 / -1;
 			padding-inline: 24px;
+		}
+
+		.hero__cta-btn {
+			font-size: 15px;
+			padding: 12px 32px;
 		}
 	}
 </style>

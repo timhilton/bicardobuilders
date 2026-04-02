@@ -27,7 +27,7 @@ import Logo from '../components/Logo.astro';
 		position: fixed;
 		inset: 0;
 		z-index: 20000;
-		display: flex;
+		display: none;
 		align-items: center;
 		justify-content: center;
 	}
@@ -45,6 +45,9 @@ import Logo from '../components/Logo.astro';
 </style>
 
 <script>
+	// Captured before any astro:page-load handler runs — true means user came from within the site
+	const arrivedViaInternalNav = sessionStorage.getItem('siteVisited') === 'true';
+
 	function initSplash(): void {
 		const overlay = document.getElementById('splash-overlay') as HTMLElement | null;
 		const splashBg = document.getElementById('splash-bg') as HTMLElement | null;
@@ -52,11 +55,11 @@ import Logo from '../components/Logo.astro';
 		const navLogo = document.querySelector<HTMLElement>('.nav__logo');
 		if (!overlay || !splashBg || !splashLogo) return;
 
-		if (sessionStorage.getItem('introSeen')) {
-			overlay.style.display = 'none';
+		if (arrivedViaInternalNav || sessionStorage.getItem('introSeen')) {
 			return;
 		}
 		sessionStorage.setItem('introSeen', 'true');
+		overlay.style.display = 'flex';
 
 		// Phase 1: fade logo in
 		requestAnimationFrame(() => {

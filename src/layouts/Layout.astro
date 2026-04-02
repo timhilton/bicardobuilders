@@ -98,30 +98,19 @@ const { title, description = "Default site description" } = Astro.props;
 </style>
 
 <style is:global>
-	/* Page heading: old slides up and fades, new slides up from below */
-	::view-transition-old(page-heading) {
-		animation: 180ms ease-in both vt-heading-out;
-	}
-
-	::view-transition-new(page-heading) {
-		animation: 240ms ease-out 120ms both vt-heading-in;
-	}
-
-	@keyframes vt-heading-out {
-		to {
-			opacity: 0;
-			transform: translateY(-10px);
-		}
-	}
-
-	@keyframes vt-heading-in {
+	@keyframes heading-fade-up {
 		from {
 			opacity: 0;
-			transform: translateY(10px);
+			transform: translateY(12px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
 		}
 	}
 
-	/* Images start hidden; JS adds .img-animate to trigger the entrance */
+
+/* Images start hidden; JS adds .img-animate to trigger the entrance */
 	@media (prefers-reduced-motion: no-preference) {
 		img:not(.nav-logo):not(.content__arrow):not(.hero__img) {
 			opacity: 0;
@@ -192,11 +181,55 @@ const { title, description = "Default site description" } = Astro.props;
 			background 140ms ease,
 			transform 140ms ease;
 		box-shadow: var(--shadow-image);
+		position: relative;
+		overflow: hidden;
+	}
+
+	.btn-pill::after {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: -75%;
+		width: 50%;
+		height: 100%;
+		background: linear-gradient(
+			120deg,
+			transparent 0%,
+			rgba(255, 255, 255, 0.25) 50%,
+			transparent 100%
+		);
+		transition: none;
+	}
+
+	.btn-pill:hover::after {
+		animation: btn-shimmer 600ms ease forwards;
+	}
+
+	@keyframes btn-shimmer {
+		0%   { left: -75%; }
+		100% { left: 150%; }
 	}
 
 	.btn-pill:hover {
 		background: var(--color-brand-secondary-hover);
 		transform: translateY(-1px);
+	}
+
+	.hero__gallery {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+	}
+
+	.hero__img {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		opacity: 0;
+		transition: opacity 1.5s ease;
 	}
 </style>
 
@@ -274,8 +307,21 @@ const { title, description = "Default site description" } = Astro.props;
 		outOfView.forEach((img) => observer.observe(img));
 	}
 
+	const HEADING_SELECTOR = ".about__heading, .contact__heading, .case-study__title, .region__name";
+
+	function resetHeadingAnimations() {
+		document.querySelectorAll<HTMLElement>(HEADING_SELECTOR).forEach((el) => {
+			el.style.animation = "none";
+			el.style.opacity = "0";
+			el.getBoundingClientRect(); // force reflow
+			el.style.animation = "";
+			el.style.opacity = "";
+		});
+	}
+
 	// Initial page load + every view-transition navigation
 	document.addEventListener("astro:page-load", setupImageAnimations);
+	document.addEventListener("astro:page-load", resetHeadingAnimations);
 
 	function handlePendingScroll() {
 		const target = sessionStorage.getItem("pendingScrollTo");
@@ -291,4 +337,7 @@ const { title, description = "Default site description" } = Astro.props;
 	}
 
 	document.addEventListener("astro:page-load", handlePendingScroll);
+	document.addEventListener("astro:page-load", () => {
+		sessionStorage.setItem("siteVisited", "true");
+	});
 </script>

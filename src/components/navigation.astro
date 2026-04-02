@@ -139,25 +139,33 @@ const isActive = (href: string) =>
         letter-spacing: 0.08em;
         padding: 8px 6px;
         border-radius: 4px;
-        transition:
-            background-color var(--transition-fast),
-            color var(--transition-fast);
+        position: relative;
     }
 
-    .nav__link:hover {
-        background: rgba(17, 24, 39, 0.06);
+    .nav__link::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 6px;
+        right: 6px;
+        height: 1px;
+        background: var(--color-brand-primary);
+        transform: scaleX(0);
+        transform-origin: left;
+    }
+
+    .nav__link--active::after {
+        animation: nav-underline-in 350ms ease forwards;
+    }
+
+    @keyframes nav-underline-in {
+        from { transform: scaleX(0); }
+        to { transform: scaleX(1); }
     }
 
     .nav__link:focus-visible {
         outline: 3px solid rgba(72, 146, 190, 0.35);
         outline-offset: 4px;
-    }
-
-    .nav__link--active {
-        text-decoration: underline;
-        text-underline-offset: 10px;
-        text-decoration-color: var(--color-brand-primary);
-        text-decoration-thickness: 1px;
     }
 
     /* Hamburger button — hidden on desktop */
@@ -267,6 +275,13 @@ const isActive = (href: string) =>
         const menu = document.querySelector<HTMLElement>("#nav-menu");
         if (!toggle || !menu) return;
 
+        // Restart underline animation on the active link
+        document.querySelectorAll<HTMLElement>(".nav__link--active").forEach((link) => {
+            link.classList.remove("nav__link--active");
+            link.getBoundingClientRect();
+            link.classList.add("nav__link--active");
+        });
+
         toggle.onclick = () => {
             const open = menu.classList.toggle("is-open");
             toggle.setAttribute("aria-expanded", String(open));
@@ -295,7 +310,7 @@ const isActive = (href: string) =>
                         }
                     } else {
                         sessionStorage.setItem("pendingScrollTo", hashMatch[1]);
-                        window.location.href = "/";
+                        import("astro:transitions/client").then(({ navigate }) => navigate("/"));
                     }
                 }
             });
