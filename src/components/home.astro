@@ -17,7 +17,7 @@ const ctaLabel: string = content?.cta_label ?? "Portfolio";
 ---
 
 <section class="hero__content">
-	<HeroCarousel client:load images={heroImages} showDotNav={false} />
+	<HeroCarousel client:visible images={heroImages} showDotNav={false} />
 </section>
 
 <div class="hero__tagline-row">

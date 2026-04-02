@@ -36,7 +36,7 @@ const hours =
       heroImages.length > 0 ? (
         <div class="contact__hero">
           <div class="contact__carousel-inner">
-            <HeroCarousel client:load images={heroImages} showDotNav={true} swipeable={true} />
+            <HeroCarousel client:visible images={heroImages} showDotNav={true} swipeable={true} />
           </div>
         </div>
       ) : (
