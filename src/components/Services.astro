@@ -1,5 +1,5 @@
 ---
-import { getStory } from "../lib/storyblok";
+import { getStory, sbImage } from "../lib/storyblok";
 import { renderRichText } from "@storyblok/astro";
 import HeroCarousel from "./HeroCarousel.tsx";
 
@@ -21,10 +21,10 @@ const serviceItems: string[] =
 		.filter(Boolean) ?? [];
 const servicesImages: string[] =
 	servicesBlok?.services_images
-		?.map((img: { filename: string }) => img.filename)
+		?.map((img: { filename: string }) => sbImage(img.filename, 1200))
 		.filter(Boolean) ??
 	(servicesBlok?.services_image?.filename
-		? [servicesBlok.services_image.filename]
+		? [sbImage(servicesBlok.services_image.filename, 1200)]
 		: []);
 ---
 

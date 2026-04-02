@@ -1,7 +1,7 @@
 ---
 import { renderRichText } from "@storyblok/astro";
 import PageLayout from "../layouts/PageLayout.astro";
-import { getStory } from "../lib/storyblok";
+import { getStory, sbImage } from "../lib/storyblok";
 import HeroCarousel from "../components/HeroCarousel.tsx";
 
 const story = await getStory("contact");
@@ -9,8 +9,8 @@ const content = story?.content;
 
 const heading = content?.heading ?? "CONTACT";
 const heroImages: string[] = content?.hero_images
-  ?.map((img: any) => img.filename)
-  .filter(Boolean) ?? [content?.hero_image?.filename].filter(Boolean);
+  ?.map((img: any) => sbImage(img.filename, 1200))
+  .filter(Boolean) ?? [content?.hero_image?.filename].filter(Boolean).map((url: string) => sbImage(url, 1200));
 const phone = content?.phone ?? "(415) 555-0198";
 const phoneParts = phone.split("•").map((s: string) => s.trim());
 const ownerName = phoneParts.length > 1 ? phoneParts[0] : null;
@@ -36,7 +36,7 @@ const hours =
       heroImages.length > 0 ? (
         <div class="contact__hero">
           <div class="contact__carousel-inner">
-            <HeroCarousel client:visible images={heroImages} showDotNav={true} swipeable={true} />
+            <HeroCarousel client:load images={heroImages} showDotNav={true} swipeable={true} />
           </div>
         </div>
       ) : (
