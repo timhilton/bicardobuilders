@@ -2,6 +2,8 @@
 import PageLayout from "../layouts/PageLayout.astro";
 import { getStories, sbImage } from "../lib/storyblok";
 
+export const prerender = true;
+
 const projectStories = await getStories({ starts_with: "portfolio/" });
 
 // Filter out the index story itself
@@ -200,7 +202,7 @@ function getTitle(project: any): string {
                               <div class="img-wrap">
                                 {thumb ? (
                                   <img
-                                    src={sbImage(thumb, 1920)}
+                                    src={sbImage(thumb, 800)}
                                     alt={title}
                                     class="img"
                                     loading={j === 0 ? "eager" : "lazy"}
