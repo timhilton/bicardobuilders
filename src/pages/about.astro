@@ -8,9 +8,9 @@ const story = await getStory("about");
 const content = story?.content;
 
 const heading = content?.heading ?? "ABOUT US";
-const heroImages: string[] = content?.hero_images
-  ?.map((img: any) => img.filename)
-  .filter(Boolean) ?? [content?.hero_image?.filename].filter(Boolean);
+const heroImages: string[] =
+  content?.hero_images?.map((img: any) => img.filename).filter(Boolean) ??
+  [content?.hero_image?.filename].filter(Boolean);
 const bodyHtml = content?.body ? renderRichText(content.body) : null;
 const ctaLabel = content?.cta_label;
 const ctaUrl = content?.cta_url;
@@ -28,7 +28,12 @@ const ctaUrl = content?.cta_url;
     {
       heroImages.length > 0 ? (
         <div class="about__hero">
-          <HeroCarousel client:load images={heroImages} showDotNav={true} swipeable={true} />
+          <HeroCarousel
+            client:load
+            images={heroImages}
+            showDotNav={true}
+            swipeable={true}
+          />
         </div>
       ) : (
         <div class="about__hero about__hero--placeholder" aria-hidden="true" />
@@ -38,7 +43,7 @@ const ctaUrl = content?.cta_url;
     <div class="about__inner">
       <div class="about__body" set:html={bodyHtml} />
       <div class="about__cta-wrap">
-        <a href='/contact' class="btn-pill">{ctaLabel}</a>
+        <a href="/contact" class="btn-pill">{ctaLabel}</a>
       </div>
     </div>
   </div>
@@ -98,7 +103,9 @@ const ctaUrl = content?.cta_url;
 
   .about__body {
     color: var(--color-text-primary);
-    font-size: 24px;
+    font-size: var(--text-md);
+    font-weight: 100;
+    letter-spacing: 0.025em;
     line-height: 34px;
     grid-column: 1/-1;
 
@@ -115,4 +122,3 @@ const ctaUrl = content?.cta_url;
     grid-column: 1/-1;
   }
 </style>
-
