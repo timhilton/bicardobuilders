@@ -21,7 +21,15 @@ const { title, description = "Default site description" } = Astro.props;
 		<link
 			href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap"
 			rel="stylesheet"
+			media="print"
+			onload="this.media='all'"
 		/>
+		<noscript>
+			<link
+				href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap"
+				rel="stylesheet"
+			/>
+		</noscript>
 		<ClientRouter />
 
 		<slot name="head" />
@@ -98,32 +106,21 @@ const { title, description = "Default site description" } = Astro.props;
 </style>
 
 <style is:global>
-	/* Page heading: old slides up and fades, new slides up from below */
-	::view-transition-old(page-heading) {
-		animation: 180ms ease-in both vt-heading-out;
-	}
-
-	::view-transition-new(page-heading) {
-		animation: 240ms ease-out 120ms both vt-heading-in;
-	}
-
-	@keyframes vt-heading-out {
-		to {
-			opacity: 0;
-			transform: translateY(-10px);
-		}
-	}
-
-	@keyframes vt-heading-in {
+	@keyframes heading-fade-up {
 		from {
 			opacity: 0;
-			transform: translateY(10px);
+			transform: translateY(12px);
+		}
+		to {
+			opacity: 1;
+			transform: translateY(0);
 		}
 	}
 
-	/* Images start hidden; JS adds .img-animate to trigger the entrance */
+
+/* Images start hidden; JS adds .img-animate to trigger the entrance */
 	@media (prefers-reduced-motion: no-preference) {
-		img:not(.nav-logo):not(.content__arrow):not(.hero__img) {
+		img:not(.nav-logo):not(.content__arrow):not(.hero__img):not(.img-done) {
 			opacity: 0;
 			transform: translateY(18px);
 		}
@@ -150,6 +147,7 @@ const { title, description = "Default site description" } = Astro.props;
 		src: url("/fonts/Manrope-Regular.ttf") format("truetype");
 		font-weight: 400;
 		font-style: normal;
+		font-display: swap;
 	}
 
 	@font-face {
@@ -157,6 +155,7 @@ const { title, description = "Default site description" } = Astro.props;
 		src: url("/fonts/Manrope-Light.ttf") format("truetype");
 		font-weight: 300;
 		font-style: normal;
+		font-display: swap;
 	}
 
 	@font-face {
@@ -164,6 +163,7 @@ const { title, description = "Default site description" } = Astro.props;
 		src: url("/fonts/Manrope-ExtraLight.ttf") format("truetype");
 		font-weight: 200;
 		font-style: normal;
+		font-display: swap;
 	}
 	.visually-hidden {
 		position: absolute;
@@ -192,11 +192,55 @@ const { title, description = "Default site description" } = Astro.props;
 			background 140ms ease,
 			transform 140ms ease;
 		box-shadow: var(--shadow-image);
+		position: relative;
+		overflow: hidden;
+	}
+
+	.btn-pill::after {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: -75%;
+		width: 50%;
+		height: 100%;
+		background: linear-gradient(
+			120deg,
+			transparent 0%,
+			rgba(255, 255, 255, 0.25) 50%,
+			transparent 100%
+		);
+		transition: none;
+	}
+
+	.btn-pill:hover::after {
+		animation: btn-shimmer 600ms ease forwards;
+	}
+
+	@keyframes btn-shimmer {
+		0%   { left: -75%; }
+		100% { left: 150%; }
 	}
 
 	.btn-pill:hover {
 		background: var(--color-brand-secondary-hover);
 		transform: translateY(-1px);
+	}
+
+	.hero__gallery {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+	}
+
+	.hero__img {
+		position: absolute;
+		inset: 0;
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		opacity: 0;
+		transition: opacity 1.5s ease;
 	}
 </style>
 
@@ -226,7 +270,7 @@ const { title, description = "Default site description" } = Astro.props;
 
 		// Reset any previous run
 		images.forEach((img) => {
-			img.classList.remove("img-animate");
+			img.classList.remove("img-animate", "img-done");
 			img.style.removeProperty("--img-delay");
 		});
 
@@ -250,21 +294,29 @@ const { title, description = "Default site description" } = Astro.props;
 			(pct >= THRESHOLD ? inView : outOfView).push(img);
 		});
 
+		const clearAnim = (img: HTMLElement) => {
+			img.addEventListener("animationend", () => {
+				img.classList.add("img-done");
+				img.classList.remove("img-animate");
+			}, { once: true });
+		};
+
 		// Stagger in-viewport images immediately
 		inView.forEach((img, i) => {
 			img.style.setProperty("--img-delay", `${i * STAGGER_MS}ms`);
 			img.classList.add("img-animate");
+			clearAnim(img);
 		});
 
 		// Scroll-trigger out-of-viewport images at 40% visibility
 		const observer = new IntersectionObserver(
 			(entries) => {
 				entries.forEach((entry) => {
+					const img = entry.target as HTMLElement;
 					if (entry.isIntersecting) {
-						(entry.target as HTMLElement).classList.add(
-							"img-animate",
-						);
-						observer.unobserve(entry.target);
+						img.classList.add("img-animate");
+						clearAnim(img);
+						observer.unobserve(img);
 					}
 				});
 			},
@@ -274,8 +326,21 @@ const { title, description = "Default site description" } = Astro.props;
 		outOfView.forEach((img) => observer.observe(img));
 	}
 
+	const HEADING_SELECTOR = ".about__heading, .contact__heading, .case-study__title, .region__name";
+
+	function resetHeadingAnimations() {
+		document.querySelectorAll<HTMLElement>(HEADING_SELECTOR).forEach((el) => {
+			el.style.animation = "none";
+			el.style.opacity = "0";
+			el.getBoundingClientRect(); // force reflow
+			el.style.animation = "";
+			el.style.opacity = "";
+		});
+	}
+
 	// Initial page load + every view-transition navigation
 	document.addEventListener("astro:page-load", setupImageAnimations);
+	document.addEventListener("astro:page-load", resetHeadingAnimations);
 
 	function handlePendingScroll() {
 		const target = sessionStorage.getItem("pendingScrollTo");

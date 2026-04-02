@@ -1,13 +1,18 @@
 ---
 import PageLayout from "../layouts/PageLayout.astro";
-import { getStory } from "../lib/storyblok";
+import { getStory, sbImage } from "../lib/storyblok";
+
+export const prerender = true;
 import { renderRichText } from "@storyblok/astro";
+import HeroCarousel from "../components/HeroCarousel.tsx";
 
 const story = await getStory("about");
 const content = story?.content;
 
 const heading = content?.heading ?? "ABOUT US";
-const heroImage = content?.hero_image?.filename ?? null;
+const heroImages: string[] =
+  content?.hero_images?.map((img: any) => sbImage(img.filename, 1200)).filter(Boolean) ??
+  [content?.hero_image?.filename].filter(Boolean).map((url: string) => sbImage(url, 1200));
 const bodyHtml = content?.body ? renderRichText(content.body) : null;
 const ctaLabel = content?.cta_label;
 const ctaUrl = content?.cta_url;
@@ -19,17 +24,17 @@ const ctaUrl = content?.cta_url;
 >
   <div class="about">
     <div class="about__inner">
-      <h1 class="about__heading" transition:name="page-heading">{heading}</h1>
+      <h1 class="about__heading">{heading}</h1>
     </div>
 
     {
-      heroImage ? (
+      heroImages.length > 0 ? (
         <div class="about__hero">
-          <img
-            src={heroImage}
-            alt="Bicardo Builders project"
-            class="about__hero-img"
-            loading="lazy"
+          <HeroCarousel
+            client:load
+            images={heroImages}
+            showDotNav={true}
+            swipeable={true}
           />
         </div>
       ) : (
@@ -40,7 +45,7 @@ const ctaUrl = content?.cta_url;
     <div class="about__inner">
       <div class="about__body" set:html={bodyHtml} />
       <div class="about__cta-wrap">
-        <a href={ctaUrl} class="btn-pill">{ctaLabel}</a>
+        <a href="/contact" class="btn-pill">{ctaLabel}</a>
       </div>
     </div>
   </div>
@@ -59,6 +64,7 @@ const ctaUrl = content?.cta_url;
   }
 
   .about__heading {
+    animation: heading-fade-up 400ms ease-out both;
     font-family: var(--font-manrope);
     font-size: clamp(28px, 4vw, 42px);
     font-weight: 300;
@@ -70,21 +76,15 @@ const ctaUrl = content?.cta_url;
   }
 
   .about__hero {
-    width: 100%;
-    margin-bottom: 48px;
-  }
-
-  .about__hero-img {
+    position: relative;
     width: 100vw;
     margin-inline-start: calc(50% - 50vw);
     height: clamp(280px, 45vw, 520px);
-    object-fit: cover;
-    display: block;
-    box-shadow: var(--shadow-image);
+    overflow: hidden;
+    margin-bottom: 48px;
   }
 
   .about__hero--placeholder {
-    height: clamp(280px, 45vw, 520px);
     background: #d1d5db;
   }
 
@@ -105,7 +105,9 @@ const ctaUrl = content?.cta_url;
 
   .about__body {
     color: var(--color-text-primary);
-    font-size: 24px;
+    font-size: var(--text-md);
+    font-weight: 100;
+    letter-spacing: 0.025em;
     line-height: 34px;
     grid-column: 1/-1;
 
@@ -122,4 +124,3 @@ const ctaUrl = content?.cta_url;
     grid-column: 1/-1;
   }
 </style>
-

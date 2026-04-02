@@ -2,6 +2,8 @@
 import PageLayout from "../layouts/PageLayout.astro";
 import { getStories, sbImage } from "../lib/storyblok";
 
+export const prerender = true;
+
 const projectStories = await getStories({ starts_with: "portfolio/" });
 
 // Filter out the index story itself
@@ -78,7 +80,6 @@ function getTitle(project: any): string {
   const p = body.find((b: any) => b.component === "project");
   return p?.title ?? project?.name ?? "Project";
 }
-
 ---
 
 <PageLayout
@@ -201,7 +202,7 @@ function getTitle(project: any): string {
                               <div class="img-wrap">
                                 {thumb ? (
                                   <img
-                                    src={sbImage(thumb, 1920)}
+                                    src={sbImage(thumb, 800)}
                                     alt={title}
                                     class="img"
                                     loading={j === 0 ? "eager" : "lazy"}
@@ -262,6 +263,7 @@ function getTitle(project: any): string {
   }
 
   .region__name {
+    animation: heading-fade-up 400ms ease-out both;
     font-size: 40px;
     font-family: var(--font-manrope);
     font-weight: 200;
@@ -276,10 +278,11 @@ function getTitle(project: any): string {
     display: block;
     text-decoration: none;
     color: inherit;
+    background-color: transparent;
   }
 
-  .project-card:hover {
-    opacity: 0.9;
+  .project-card:hover .img {
+    transform: scale(1.05);
   }
 
   .img-wrap {
@@ -293,11 +296,7 @@ function getTitle(project: any): string {
     height: 100%;
     object-fit: cover;
     display: block;
-    transition: transform 300ms ease;
-  }
-
-  .project-card:hover .img {
-    transform: scale(1.03);
+    transition: transform 350ms ease-in-out;
   }
 
   .img-placeholder {

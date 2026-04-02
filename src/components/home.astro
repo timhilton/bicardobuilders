@@ -1,17 +1,19 @@
 ---
 import { renderRichText } from "@storyblok/astro";
-import { getStory } from "../lib/storyblok";
+import { getStory, sbImage } from "../lib/storyblok";
 import HeroCarousel from "./HeroCarousel.tsx";
 
 const story = await getStory("home");
 const content = story?.content;
 
-const heroImages: string[] = content?.hero_images
-  ?.map((img: any) => img.filename)
-  .filter(Boolean) ?? [content?.hero_image?.filename].filter(Boolean);
+const heroImages: string[] =
+	content?.hero_images?.map((img: any) => sbImage(img.filename, 1600)).filter(Boolean) ??
+	[content?.hero_image?.filename].filter(Boolean).map((url: string) => sbImage(url, 1600));
 
-const taglineHtml: string = content?.tagline ? (renderRichText(content.tagline) ?? '') : '';
-const ctaLabel: string = content?.cta_label ?? 'Portfolio';
+const taglineHtml: string = content?.tagline
+	? (renderRichText(content.tagline) ?? "")
+	: "";
+const ctaLabel: string = content?.cta_label ?? "Portfolio";
 ---
 
 <section class="hero__content">
@@ -29,25 +31,6 @@ const ctaLabel: string = content?.cta_label ?? 'Portfolio';
 		color-scheme: light;
 	}
 
-	/* ===== HERO MEDIA ===== */
-	:global(.hero__gallery) {
-		position: absolute;
-		inset: 0;
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-	}
-
-	:global(.hero__img) {
-		position: absolute;
-		inset: 0;
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-		opacity: 0;
-		transition: opacity 1.5s ease;
-	}
-
 	/* ===== HERO CONTENT ===== */
 	.hero__content {
 		position: relative;
@@ -58,12 +41,7 @@ const ctaLabel: string = content?.cta_label ?? 'Portfolio';
 		margin-inline-start: calc(50% - 50vw);
 	}
 
-	.hero__cta-btn {
-		font-size: 15px;
-		padding: 12px 32px;
-	}
-
-/* ===== TAGLINE ROW ===== */
+	/* ===== TAGLINE ROW ===== */
 	.hero__tagline-row {
 		grid-column: 4 / span 6;
 		display: flex;
@@ -77,6 +55,8 @@ const ctaLabel: string = content?.cta_label ?? 'Portfolio';
 	.hero__tagline {
 		margin: 0;
 		font-size: var(--text-md);
+		font-weight: 100;
+		letter-spacing: 0.025em;
 		color: var(--color-text-primary);
 	}
 
@@ -109,6 +89,10 @@ const ctaLabel: string = content?.cta_label ?? 'Portfolio';
 			grid-column: 1 / -1;
 			padding-inline: 24px;
 		}
+
+		.hero__cta-btn {
+			font-size: 15px;
+			padding: 12px 32px;
+		}
 	}
 </style>
-

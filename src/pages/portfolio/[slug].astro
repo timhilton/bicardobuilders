@@ -29,7 +29,7 @@ const descriptionHtml: string | null =
 >
   <div class="case-study">
     <div class="case-study__inner">
-      <h1 class="case-study__title" transition:name="page-heading">
+      <h1 class="case-study__title">
         {title.toUpperCase()}
       </h1>
 
@@ -181,6 +181,7 @@ const descriptionHtml: string | null =
   }
 
   .case-study__title {
+    animation: heading-fade-up 400ms ease-out both;
     font-size: clamp(24px, 4vw, 38px);
     font-family: var(--font-manrope);
     font-weight: 300;
@@ -359,7 +360,7 @@ const descriptionHtml: string | null =
     object-position: center;
     display: block;
     cursor: pointer;
-    transition: opacity 140ms ease;
+    transition: transform 350ms ease-in-out;
     box-shadow: var(--shadow-image);
   }
 
@@ -369,7 +370,7 @@ const descriptionHtml: string | null =
   }
 
   .mosaic-img:hover {
-    opacity: 0.85;
+    transform: scale(1.05);
   }
 
   .photo-mosaic__empty {
@@ -525,8 +526,13 @@ const descriptionHtml: string | null =
     }
 
     .case-study__title,
-    .case-study__services {
+    .case-study__services,
+    .case-study__description {
       grid-column: 2 / span 10;
+    }
+
+    .case-study__description {
+      margin-top: 24px;
     }
 
     .case-study__back {
@@ -534,7 +540,6 @@ const descriptionHtml: string | null =
       justify-content: center;
     }
 
-    .case-study__description,
     .photo-mosaic,
     .photo-mosaic__empty {
       grid-column: 1 / -1;

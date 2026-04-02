@@ -139,25 +139,37 @@ const isActive = (href: string) =>
         letter-spacing: 0.08em;
         padding: 8px 6px;
         border-radius: 4px;
-        transition:
-            background-color var(--transition-fast),
-            color var(--transition-fast);
+        position: relative;
     }
 
-    .nav__link:hover {
-        background: rgba(17, 24, 39, 0.06);
+    .nav__link::after {
+        content: "";
+        position: absolute;
+        bottom: 0;
+        left: 6px;
+        right: 6px;
+        height: 1px;
+        background: var(--color-brand-primary);
+        transform: scaleX(0);
+        transform-origin: left;
+    }
+
+    .nav__link--active::after {
+        animation: nav-underline-in 350ms ease forwards;
+    }
+
+    @keyframes nav-underline-in {
+        from {
+            transform: scaleX(0);
+        }
+        to {
+            transform: scaleX(1);
+        }
     }
 
     .nav__link:focus-visible {
         outline: 3px solid rgba(72, 146, 190, 0.35);
         outline-offset: 4px;
-    }
-
-    .nav__link--active {
-        text-decoration: underline;
-        text-underline-offset: 10px;
-        text-decoration-color: var(--color-brand-primary);
-        text-decoration-thickness: 1px;
     }
 
     /* Hamburger button — hidden on desktop */
@@ -231,26 +243,37 @@ const isActive = (href: string) =>
         }
 
         .nav__list.is-open {
-            display: flex;
-            flex-direction: column;
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-template-rows: auto;
             position: absolute;
             top: 52px;
             left: 0;
             height: auto;
             overflow: hidden;
+            border-bottom: 1px solid var(--color-brand-primary);
+            box-shadow: var(--shadow-image);
         }
 
         .nav__item {
             width: 100%;
+            grid-column: 2 / span 10;
         }
 
         .nav__link {
             display: block;
-            width: 100%;
+            position: relative;
+            width: max-content;
             padding: 13px 24px;
             border-bottom: 1px solid #f3f4f6;
             border-radius: 0;
             font-size: 15px;
+        }
+
+        .nav__link--active::after {
+            bottom: 6px;
+            left: 24px;
+            right: 24px;
         }
 
         .nav__link:hover {
@@ -266,6 +289,15 @@ const isActive = (href: string) =>
             document.querySelector<HTMLButtonElement>(".nav__toggle");
         const menu = document.querySelector<HTMLElement>("#nav-menu");
         if (!toggle || !menu) return;
+
+        // Restart underline animation on the active link
+        document
+            .querySelectorAll<HTMLElement>(".nav__link--active")
+            .forEach((link) => {
+                link.classList.remove("nav__link--active");
+                link.getBoundingClientRect();
+                link.classList.add("nav__link--active");
+            });
 
         toggle.onclick = () => {
             const open = menu.classList.toggle("is-open");
@@ -283,19 +315,25 @@ const isActive = (href: string) =>
                 toggle.setAttribute("aria-expanded", "false");
                 toggle.setAttribute("aria-label", "Open navigation");
 
-                const href = (link as HTMLAnchorElement).getAttribute("href") ?? "";
+                const href =
+                    (link as HTMLAnchorElement).getAttribute("href") ?? "";
                 const hashMatch = href.match(/^(?:\/)?#(.+)$/);
                 if (hashMatch) {
                     e.preventDefault();
                     if (window.location.pathname === "/") {
                         const target = document.getElementById(hashMatch[1]);
                         if (target) {
-                            const top = target.getBoundingClientRect().top + window.scrollY - 64;
+                            const top =
+                                target.getBoundingClientRect().top +
+                                window.scrollY -
+                                64;
                             window.scrollTo({ top, behavior: "smooth" });
                         }
                     } else {
                         sessionStorage.setItem("pendingScrollTo", hashMatch[1]);
-                        window.location.href = "/";
+                        import("astro:transitions/client").then(
+                            ({ navigate }) => navigate("/"),
+                        );
                     }
                 }
             });
