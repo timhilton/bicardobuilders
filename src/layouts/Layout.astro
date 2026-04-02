@@ -345,7 +345,4 @@ const { title, description = "Default site description" } = Astro.props;
 	}
 
 	document.addEventListener("astro:page-load", handlePendingScroll);
-	document.addEventListener("astro:page-load", () => {
-		sessionStorage.setItem("siteVisited", "true");
-	});
 </script>
