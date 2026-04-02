@@ -112,7 +112,7 @@ const { title, description = "Default site description" } = Astro.props;
 
 /* Images start hidden; JS adds .img-animate to trigger the entrance */
 	@media (prefers-reduced-motion: no-preference) {
-		img:not(.nav-logo):not(.content__arrow):not(.hero__img) {
+		img:not(.nav-logo):not(.content__arrow):not(.hero__img):not(.img-done) {
 			opacity: 0;
 			transform: translateY(18px);
 		}
@@ -259,7 +259,7 @@ const { title, description = "Default site description" } = Astro.props;
 
 		// Reset any previous run
 		images.forEach((img) => {
-			img.classList.remove("img-animate");
+			img.classList.remove("img-animate", "img-done");
 			img.style.removeProperty("--img-delay");
 		});
 
@@ -283,21 +283,29 @@ const { title, description = "Default site description" } = Astro.props;
 			(pct >= THRESHOLD ? inView : outOfView).push(img);
 		});
 
+		const clearAnim = (img: HTMLElement) => {
+			img.addEventListener("animationend", () => {
+				img.classList.add("img-done");
+				img.classList.remove("img-animate");
+			}, { once: true });
+		};
+
 		// Stagger in-viewport images immediately
 		inView.forEach((img, i) => {
 			img.style.setProperty("--img-delay", `${i * STAGGER_MS}ms`);
 			img.classList.add("img-animate");
+			clearAnim(img);
 		});
 
 		// Scroll-trigger out-of-viewport images at 40% visibility
 		const observer = new IntersectionObserver(
 			(entries) => {
 				entries.forEach((entry) => {
+					const img = entry.target as HTMLElement;
 					if (entry.isIntersecting) {
-						(entry.target as HTMLElement).classList.add(
-							"img-animate",
-						);
-						observer.unobserve(entry.target);
+						img.classList.add("img-animate");
+						clearAnim(img);
+						observer.unobserve(img);
 					}
 				});
 			},

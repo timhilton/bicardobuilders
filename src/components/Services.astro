@@ -32,7 +32,13 @@ const servicesImages: string[] =
 	<h2 class="services__heading">Services</h2>
 	<div class="services__copy" set:html={servicesIntro} />
 	<div class="services__image">
-		<HeroCarousel client:load images={servicesImages} showDotNav={true} className="services__carousel" swipeable={true} />
+		<HeroCarousel
+			client:load
+			images={servicesImages}
+			showDotNav={true}
+			className="services__carousel"
+			swipeable={true}
+		/>
 	</div>
 	<div class="services__right">
 		<ul class="services__list">
@@ -153,7 +159,11 @@ const servicesImages: string[] =
 		padding: 0;
 		cursor: pointer;
 		opacity: 0.45;
-		transition: opacity 200ms ease, transform 200ms ease, width 200ms ease, height 200ms ease;
+		transition:
+			opacity 200ms ease,
+			transform 200ms ease,
+			width 200ms ease,
+			height 200ms ease;
 	}
 
 	:global(.services__carousel .hero__dot:hover) {
@@ -214,10 +224,15 @@ const servicesImages: string[] =
 		.services__copy {
 			margin-top: 24px;
 			margin-bottom: 24px;
+			font-size: var(--text-md);
 		}
 
 		.services__right {
 			margin-top: 24px;
+		}
+
+		.services__cta-blok {
+			font-size: var(--text-md);
 		}
 	}
 

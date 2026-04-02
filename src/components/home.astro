@@ -6,12 +6,14 @@ import HeroCarousel from "./HeroCarousel.tsx";
 const story = await getStory("home");
 const content = story?.content;
 
-const heroImages: string[] = content?.hero_images
-  ?.map((img: any) => img.filename)
-  .filter(Boolean) ?? [content?.hero_image?.filename].filter(Boolean);
+const heroImages: string[] =
+	content?.hero_images?.map((img: any) => img.filename).filter(Boolean) ??
+	[content?.hero_image?.filename].filter(Boolean);
 
-const taglineHtml: string = content?.tagline ? (renderRichText(content.tagline) ?? '') : '';
-const ctaLabel: string = content?.cta_label ?? 'Portfolio';
+const taglineHtml: string = content?.tagline
+	? (renderRichText(content.tagline) ?? "")
+	: "";
+const ctaLabel: string = content?.cta_label ?? "Portfolio";
 ---
 
 <section class="hero__content">
@@ -39,8 +41,7 @@ const ctaLabel: string = content?.cta_label ?? 'Portfolio';
 		margin-inline-start: calc(50% - 50vw);
 	}
 
-
-/* ===== TAGLINE ROW ===== */
+	/* ===== TAGLINE ROW ===== */
 	.hero__tagline-row {
 		grid-column: 4 / span 6;
 		display: flex;
@@ -54,6 +55,8 @@ const ctaLabel: string = content?.cta_label ?? 'Portfolio';
 	.hero__tagline {
 		margin: 0;
 		font-size: var(--text-md);
+		font-weight: 100;
+		letter-spacing: 0.025em;
 		color: var(--color-text-primary);
 	}
 
@@ -93,4 +96,3 @@ const ctaLabel: string = content?.cta_label ?? 'Portfolio';
 		}
 	}
 </style>
-

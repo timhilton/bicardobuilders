@@ -78,7 +78,6 @@ function getTitle(project: any): string {
   const p = body.find((b: any) => b.component === "project");
   return p?.title ?? project?.name ?? "Project";
 }
-
 ---
 
 <PageLayout
@@ -277,10 +276,11 @@ function getTitle(project: any): string {
     display: block;
     text-decoration: none;
     color: inherit;
+    background-color: transparent;
   }
 
-  .project-card:hover {
-    opacity: 0.9;
+  .project-card:hover .img {
+    transform: scale(1.05);
   }
 
   .img-wrap {
@@ -294,11 +294,7 @@ function getTitle(project: any): string {
     height: 100%;
     object-fit: cover;
     display: block;
-    transition: transform 300ms ease;
-  }
-
-  .project-card:hover .img {
-    transform: scale(1.03);
+    transition: transform 350ms ease-in-out;
   }
 
   .img-placeholder {

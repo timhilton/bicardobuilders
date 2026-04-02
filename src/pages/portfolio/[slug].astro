@@ -526,8 +526,13 @@ const descriptionHtml: string | null =
     }
 
     .case-study__title,
-    .case-study__services {
+    .case-study__services,
+    .case-study__description {
       grid-column: 2 / span 10;
+    }
+
+    .case-study__description {
+      margin-top: 24px;
     }
 
     .case-study__back {
@@ -535,7 +540,6 @@ const descriptionHtml: string | null =
       justify-content: center;
     }
 
-    .case-study__description,
     .photo-mosaic,
     .photo-mosaic__empty {
       grid-column: 1 / -1;
