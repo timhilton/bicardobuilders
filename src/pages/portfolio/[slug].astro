@@ -360,7 +360,7 @@ const descriptionHtml: string | null =
     object-position: center;
     display: block;
     cursor: pointer;
-    transition: opacity 140ms ease;
+    transition: transform 350ms ease-in-out;
     box-shadow: var(--shadow-image);
   }
 
@@ -370,7 +370,7 @@ const descriptionHtml: string | null =
   }
 
   .mosaic-img:hover {
-    opacity: 0.85;
+    transform: scale(1.05);
   }
 
   .photo-mosaic__empty {
