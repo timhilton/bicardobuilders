@@ -4,9 +4,21 @@ import { ClientRouter } from "astro:transitions";
 interface Props {
 	title: string;
 	description?: string;
+	ogImage?: string;
+	ogType?: string;
+	robots?: string;
 }
 
-const { title, description = "Default site description" } = Astro.props;
+const {
+	title,
+	description = "Bicardo Builders Inc — General Contractor, San Francisco Bay Area",
+	ogImage = "/og_image.jpg",
+	ogType = "website",
+	robots = "index, follow",
+} = Astro.props;
+const siteUrl = "https://bicardobuilders.com";
+const canonicalUrl = `${siteUrl}${Astro.url.pathname}`;
+const resolvedOgImage = ogImage.startsWith("http") ? ogImage : `${siteUrl}${ogImage}`;
 ---
 
 <!doctype html>
@@ -24,6 +36,13 @@ const { title, description = "Default site description" } = Astro.props;
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<title>{title}</title>
 		<meta name="description" content={description} />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:image" content={resolvedOgImage} />
+		<meta property="og:url" content={canonicalUrl} />
+		<meta property="og:type" content={ogType} />
+		<meta name="robots" content={robots} />
+		<link rel="canonical" href={canonicalUrl} />
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link
