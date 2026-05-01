@@ -4,14 +4,55 @@ interface Props {
 	formNote: string;
 }
 
+type FieldKey = 'name' | 'phone' | 'email' | 'message';
+
+const EMPTY_VALUES: Record<FieldKey, string> = { name: '', phone: '', email: '', message: '' };
+const EMPTY_TOUCHED: Record<FieldKey, boolean> = { name: false, phone: false, email: false, message: false };
+
+function getFieldValidity(id: FieldKey, value: string): 'neutral' | 'valid' | 'invalid' {
+	const v = value.trim();
+	switch (id) {
+		case 'name':
+			return v.length >= 3 ? 'valid' : 'invalid';
+		case 'phone':
+			if (v === '') return 'neutral';
+			return v.replace(/\D/g, '').length >= 10 ? 'valid' : 'invalid';
+		case 'email':
+			return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) ? 'valid' : 'invalid';
+		case 'message':
+			return v.length >= 1 ? 'valid' : 'invalid';
+	}
+}
+
 export default function ContactForm({ formNote }: Props) {
 	const [submitting, setSubmitting] = useState(false);
 	const [modal, setModal] = useState<{ visible: boolean; success: boolean }>({ visible: false, success: false });
 	const [focused, setFocused] = useState<string | null>(null);
+	const [values, setValues] = useState<Record<FieldKey, string>>(EMPTY_VALUES);
+	const [touched, setTouched] = useState<Record<FieldKey, boolean>>(EMPTY_TOUCHED);
 	const [btnHovered, setBtnHovered] = useState(false);
+
+	const isActive = (id: FieldKey) => focused === id || values[id].length > 0;
+
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+		setValues(prev => ({ ...prev, [e.target.name as FieldKey]: e.target.value }));
+	};
+
+	const handleBlur = (id: FieldKey) => {
+		setFocused(null);
+		setTouched(prev => ({ ...prev, [id]: true }));
+	};
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
+		const allTouched: Record<FieldKey, boolean> = { name: true, phone: true, email: true, message: true };
+		setTouched(allTouched);
+
+		const isValid = (Object.keys(allTouched) as FieldKey[]).every(
+			id => getFieldValidity(id, values[id]) !== 'invalid',
+		);
+		if (!isValid) return;
+
 		setSubmitting(true);
 		const form = e.currentTarget;
 		try {
@@ -19,6 +60,8 @@ export default function ContactForm({ formNote }: Props) {
 			if (res.ok) {
 				setModal({ visible: true, success: true });
 				form.reset();
+				setValues(EMPTY_VALUES);
+				setTouched(EMPTY_TOUCHED);
 			} else {
 				setModal({ visible: true, success: false });
 			}
@@ -29,32 +72,64 @@ export default function ContactForm({ formNote }: Props) {
 		}
 	};
 
-	const fieldStyle = (id: string): React.CSSProperties => ({
-		border: focused === id ? '1px solid #4892be' : '1px solid #c8dfe9',
-		borderRadius: '6px',
-		padding: '10px 14px',
-		fontSize: '16px',
-		fontFamily: 'inherit',
-		color: '#111827',
-		background: focused === id ? '#d9ecf6' : '#e8f3fa',
-		transition: 'border-color 140ms ease, background 140ms ease',
-		width: '100%',
-		boxSizing: 'border-box',
-		outline: 'none',
-		boxShadow: focused === id ? '0 0 0 3px rgba(72, 146, 190, 0.2)' : 'none',
-	});
+	const fieldStyle = (id: FieldKey, isTextarea = false): React.CSSProperties => {
+		const isFocused = focused === id;
+		const validity = touched[id] ? getFieldValidity(id, values[id]) : 'neutral';
 
-	const labelStyle: React.CSSProperties = {
-		fontSize: '12px',
-		fontWeight: 400,
-		color: 'var(--color-text-primary)',
-		letterSpacing: '0.02em',
+		let border = '1px solid #c8dfe9';
+		let background = '#e8f3fa';
+		let boxShadow = 'none';
+
+		if (isFocused) {
+			border = '1px solid #4892be';
+			background = '#d9ecf6';
+			boxShadow = '0 0 0 3px rgba(72, 146, 190, 0.2)';
+		} else if (validity === 'invalid') {
+			border = '1px solid #c97b72';
+			background = '#fdf4f3';
+		} else if (validity === 'valid') {
+			border = '1px solid #82b898';
+			background = '#f2f7f4';
+		}
+
+		return {
+			border,
+			borderRadius: '6px',
+			padding: isTextarea ? (isActive(id) ? '13px 14px 8px' : '22px 14px 8px') : '13px 14px',
+			fontSize: '16px',
+			fontFamily: 'inherit',
+			color: '#111827',
+			background,
+			transition: 'border-color 140ms ease, background 140ms ease, padding-top 140ms ease',
+			width: '100%',
+			boxSizing: 'border-box',
+			outline: 'none',
+			boxShadow,
+		};
+	};
+
+	const floatLabelStyle = (id: FieldKey, isTextarea = false): React.CSSProperties => {
+		const active = isActive(id);
+		return {
+			position: 'absolute',
+			left: '14px',
+			top: active ? '2px' : isTextarea ? '30px' : 'calc(50% + 10px)',
+			transform: active || isTextarea ? 'none' : 'translateY(-50%)',
+			fontSize: active ? '11px' : '16px',
+			fontWeight: 400,
+			color: active ? 'var(--color-text-primary)' : '#9ca3af',
+			letterSpacing: active ? '0.02em' : '0em',
+			pointerEvents: 'none',
+			transition: 'top 140ms ease, transform 140ms ease, font-size 140ms ease, color 140ms ease',
+			lineHeight: 1,
+		};
 	};
 
 	const groupStyle: React.CSSProperties = {
 		display: 'flex',
 		flexDirection: 'column',
-		gap: '6px',
+		position: 'relative',
+		paddingTop: '20px',
 	};
 
 	return (
@@ -77,7 +152,7 @@ export default function ContactForm({ formNote }: Props) {
 			/>
 			<form style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} onSubmit={handleSubmit} noValidate>
 				<div style={groupStyle}>
-					<label style={labelStyle} htmlFor="name">Name</label>
+					<label style={floatLabelStyle('name')} htmlFor="name">Name</label>
 					<input
 						style={fieldStyle('name')}
 						id="name"
@@ -85,24 +160,26 @@ export default function ContactForm({ formNote }: Props) {
 						type="text"
 						autoComplete="name"
 						required
+						onChange={handleChange}
 						onFocus={() => setFocused('name')}
-						onBlur={() => setFocused(null)}
+						onBlur={() => handleBlur('name')}
 					/>
 				</div>
 				<div style={groupStyle}>
-					<label style={labelStyle} htmlFor="phone">Phone</label>
+					<label style={floatLabelStyle('phone')} htmlFor="phone">Phone</label>
 					<input
 						style={fieldStyle('phone')}
 						id="phone"
 						name="phone"
 						type="tel"
 						autoComplete="tel"
+						onChange={handleChange}
 						onFocus={() => setFocused('phone')}
-						onBlur={() => setFocused(null)}
+						onBlur={() => handleBlur('phone')}
 					/>
 				</div>
 				<div style={groupStyle}>
-					<label style={labelStyle} htmlFor="email">Email</label>
+					<label style={floatLabelStyle('email')} htmlFor="email">Email</label>
 					<input
 						style={fieldStyle('email')}
 						id="email"
@@ -110,23 +187,25 @@ export default function ContactForm({ formNote }: Props) {
 						type="email"
 						autoComplete="email"
 						required
+						onChange={handleChange}
 						onFocus={() => setFocused('email')}
-						onBlur={() => setFocused(null)}
+						onBlur={() => handleBlur('email')}
 					/>
 				</div>
 				<div style={groupStyle}>
-					<label style={labelStyle} htmlFor="message">Message</label>
+					<label style={floatLabelStyle('message', true)} htmlFor="message">Message</label>
 					<textarea
-						style={{ ...fieldStyle('message'), resize: 'vertical' }}
+						style={{ ...fieldStyle('message', true), resize: 'vertical' }}
 						id="message"
 						name="message"
 						rows={5}
 						required
+						onChange={handleChange}
 						onFocus={() => setFocused('message')}
-						onBlur={() => setFocused(null)}
+						onBlur={() => handleBlur('message')}
 					/>
 				</div>
-				<div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+				<div style={{ display: 'flex', justifyContent: 'center' }}>
 					<button
 						type="submit"
 						disabled={submitting}
@@ -168,7 +247,7 @@ export default function ContactForm({ formNote }: Props) {
 					>
 						<p style={{ fontFamily: '"Manrope", sans-serif', fontSize: '18px', fontWeight: 300, color: 'var(--color-text-primary)', margin: '0 0 32px', lineHeight: 1.6 }}>
 							{modal.success
-								? "Your message has been sent. We’ll be in touch shortly."
+								? "Your message has been sent. We'll be in touch shortly."
 								: 'Something went wrong. Please try again or call us directly.'}
 						</p>
 						<button
