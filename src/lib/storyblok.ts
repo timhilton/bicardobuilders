@@ -48,7 +48,15 @@ export async function getStoriesStatic(): Promise<any[]> {
   }
 }
 
-export function sbImage(url: string, width = 1200, quality = 85): string {
+export function sbImage(url: string, width = 1200, quality = 95, format?: string): string {
   if (!url) return '';
-  return `${url}/m/${width}x0/filters:quality(${quality})`;
+  const filters = format
+    ? `filters:quality(${quality}):format(${format})`
+    : `filters:quality(${quality})`;
+  return `${url}/m/${width}x0/${filters}`;
+}
+
+export function sbImageSrcset(url: string, widths: number[], quality = 95, format?: string): string {
+  if (!url) return '';
+  return widths.map(w => `${sbImage(url, w, quality, format)} ${w}w`).join(', ');
 }

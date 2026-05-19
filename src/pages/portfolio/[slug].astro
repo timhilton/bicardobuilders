@@ -1,6 +1,6 @@
 ---
 import PageLayout from "../../layouts/PageLayout.astro";
-import { getStory } from "../../lib/storyblok";
+import { getStory, sbImage, sbImageSrcset } from "../../lib/storyblok";
 import { renderRichText } from "@storyblok/astro";
 
 export const prerender = false;
@@ -60,24 +60,42 @@ const descriptionHtml: string | null =
                   <div class={`row-pair ${classes}`}>
                     {blok.image_left?.filename && (
                       <div class="photo-container">
-                        <img
-                          src={blok.image_left.filename}
-                          alt={blok.image_left.alt || title}
-                          class="mosaic-img"
-                          data-lightbox-src={blok.image_left.filename}
-                          data-lightbox-alt={blok.image_left.alt || title}
-                        />
+                        <picture>
+                          <source
+                            type="image/webp"
+                            srcset={sbImageSrcset(blok.image_left.filename, [800, 1600, 2400], 95, 'webp')}
+                            sizes="(max-width: 768px) 100vw, 33vw"
+                          />
+                          <img
+                            src={sbImage(blok.image_left.filename, 1600)}
+                            srcset={sbImageSrcset(blok.image_left.filename, [800, 1600, 2400])}
+                            sizes="(max-width: 768px) 100vw, 33vw"
+                            alt={blok.image_left.alt || title}
+                            class="mosaic-img"
+                            data-lightbox-src={blok.image_left.filename}
+                            data-lightbox-alt={blok.image_left.alt || title}
+                          />
+                        </picture>
                       </div>
                     )}
                     {blok.image_right?.filename && (
                       <div class="photo-container">
-                        <img
-                          src={blok.image_right.filename}
-                          alt={blok.image_right.alt || title}
-                          class="mosaic-img"
-                          data-lightbox-src={blok.image_right.filename}
-                          data-lightbox-alt={blok.image_right.alt || title}
-                        />
+                        <picture>
+                          <source
+                            type="image/webp"
+                            srcset={sbImageSrcset(blok.image_right.filename, [800, 1600, 2400], 95, 'webp')}
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                          />
+                          <img
+                            src={sbImage(blok.image_right.filename, 1600)}
+                            srcset={sbImageSrcset(blok.image_right.filename, [800, 1600, 2400])}
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                            alt={blok.image_right.alt || title}
+                            class="mosaic-img"
+                            data-lightbox-src={blok.image_right.filename}
+                            data-lightbox-alt={blok.image_right.alt || title}
+                          />
+                        </picture>
                       </div>
                     )}
                   </div>
@@ -95,36 +113,63 @@ const descriptionHtml: string | null =
                   >
                     {blok.image_main?.filename && (
                       <div class="photo-container">
-                        <img
-                          src={blok.image_main.filename}
-                          alt={blok.image_main.alt || title}
-                          class="mosaic-img"
-                          data-lightbox-src={blok.image_main.filename}
-                          data-lightbox-alt={blok.image_main.alt || title}
-                        />
+                        <picture>
+                          <source
+                            type="image/webp"
+                            srcset={sbImageSrcset(blok.image_main.filename, [800, 1600, 2400], 95, 'webp')}
+                            sizes="(max-width: 768px) 100vw, 48vw"
+                          />
+                          <img
+                            src={sbImage(blok.image_main.filename, 1600)}
+                            srcset={sbImageSrcset(blok.image_main.filename, [800, 1600, 2400])}
+                            sizes="(max-width: 768px) 100vw, 48vw"
+                            alt={blok.image_main.alt || title}
+                            class="mosaic-img"
+                            data-lightbox-src={blok.image_main.filename}
+                            data-lightbox-alt={blok.image_main.alt || title}
+                          />
+                        </picture>
                       </div>
                     )}
                     <div class="feature-stack">
                       {blok.image_top?.filename && (
                         <div class="photo-container">
-                          <img
-                            src={blok.image_top.filename}
-                            alt={blok.image_top.alt || title}
-                            class="mosaic-img"
-                            data-lightbox-src={blok.image_top.filename}
-                            data-lightbox-alt={blok.image_top.alt || title}
-                          />
+                          <picture>
+                            <source
+                              type="image/webp"
+                              srcset={sbImageSrcset(blok.image_top.filename, [800, 1600, 2400], 95, 'webp')}
+                              sizes="(max-width: 768px) 100vw, 35vw"
+                            />
+                            <img
+                              src={sbImage(blok.image_top.filename, 1600)}
+                              srcset={sbImageSrcset(blok.image_top.filename, [800, 1600, 2400])}
+                              sizes="(max-width: 768px) 100vw, 35vw"
+                              alt={blok.image_top.alt || title}
+                              class="mosaic-img"
+                              data-lightbox-src={blok.image_top.filename}
+                              data-lightbox-alt={blok.image_top.alt || title}
+                            />
+                          </picture>
                         </div>
                       )}
                       {blok.image_bottom?.filename && (
                         <div class="photo-container">
-                          <img
-                            src={blok.image_bottom.filename}
-                            alt={blok.image_bottom.alt || title}
-                            class="mosaic-img"
-                            data-lightbox-src={blok.image_bottom.filename}
-                            data-lightbox-alt={blok.image_bottom.alt || title}
-                          />
+                          <picture>
+                            <source
+                              type="image/webp"
+                              srcset={sbImageSrcset(blok.image_bottom.filename, [800, 1600, 2400], 95, 'webp')}
+                              sizes="(max-width: 768px) 100vw, 35vw"
+                            />
+                            <img
+                              src={sbImage(blok.image_bottom.filename, 1600)}
+                              srcset={sbImageSrcset(blok.image_bottom.filename, [800, 1600, 2400])}
+                              sizes="(max-width: 768px) 100vw, 35vw"
+                              alt={blok.image_bottom.alt || title}
+                              class="mosaic-img"
+                              data-lightbox-src={blok.image_bottom.filename}
+                              data-lightbox-alt={blok.image_bottom.alt || title}
+                            />
+                          </picture>
                         </div>
                       )}
                     </div>

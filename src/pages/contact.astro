@@ -12,8 +12,8 @@ const content = story?.content;
 
 const heading = content?.heading ?? "CONTACT";
 const heroImages: string[] = content?.hero_images
-  ?.map((img: any) => sbImage(img.filename, 1200))
-  .filter(Boolean) ?? [content?.hero_image?.filename].filter(Boolean).map((url: string) => sbImage(url, 1200));
+  ?.map((img: any) => sbImage(img.filename, 2400))
+  .filter(Boolean) ?? [content?.hero_image?.filename].filter(Boolean).map((url: string) => sbImage(url, 2400));
 const phone = content?.phone ?? "(415) 555-0198";
 const phoneParts = phone.split("•").map((s: string) => s.trim());
 const ownerName = phoneParts.length > 1 ? phoneParts[0] : null;

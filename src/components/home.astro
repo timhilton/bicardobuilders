@@ -7,8 +7,8 @@ const story = await getStory("home");
 const content = story?.content;
 
 const heroImages: string[] =
-	content?.hero_images?.map((img: any) => sbImage(img.filename, 1600)).filter(Boolean) ??
-	[content?.hero_image?.filename].filter(Boolean).map((url: string) => sbImage(url, 1600));
+	content?.hero_images?.map((img: any) => sbImage(img.filename, 2400)).filter(Boolean) ??
+	[content?.hero_image?.filename].filter(Boolean).map((url: string) => sbImage(url, 2400));
 
 const taglineHtml: string = content?.tagline
 	? (renderRichText(content.tagline) ?? "")

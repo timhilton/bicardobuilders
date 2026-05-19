@@ -11,8 +11,8 @@ const content = story?.content;
 
 const heading = content?.heading ?? "ABOUT US";
 const heroImages: string[] =
-  content?.hero_images?.map((img: any) => sbImage(img.filename, 1200)).filter(Boolean) ??
-  [content?.hero_image?.filename].filter(Boolean).map((url: string) => sbImage(url, 1200));
+  content?.hero_images?.map((img: any) => sbImage(img.filename, 2400)).filter(Boolean) ??
+  [content?.hero_image?.filename].filter(Boolean).map((url: string) => sbImage(url, 2400));
 const bodyHtml = content?.body ? renderRichText(content.body) : null;
 const ctaLabel = content?.cta_label;
 const ctaUrl = content?.cta_url;
