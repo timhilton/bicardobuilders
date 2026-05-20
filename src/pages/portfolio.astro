@@ -389,6 +389,11 @@ function getTitle(project: any): string {
 
   /* ===== MOBILE ===== */
   @media (max-width: 768px) {
+    .portfolio__inner {
+      max-width: 414px;
+      margin-inline: auto;
+    }
+
     .layout-full,
     .layout-3,
     .layout-2,
@@ -405,7 +410,9 @@ function getTitle(project: any): string {
       grid-template-columns: repeat(12, 1fr);
     }
     .region__name {
-      grid-column: 2 / span 10;
+      grid-column: 1 / -1;
+      margin-inline-start: 32px;
+      font-size: 32px;
     }
 
     .project-grid {
@@ -450,7 +457,8 @@ function getTitle(project: any): string {
     }
 
     .card-title {
-      grid-column: 2 / span 10;
+      grid-column: 1 / -1;
+      margin-inline-start: 32px;
     }
   }
 </style>
