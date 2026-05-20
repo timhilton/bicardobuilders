@@ -281,13 +281,20 @@ function getTitle(project: any): string {
     background-color: transparent;
   }
 
-  .project-card:hover .img {
+  .project-card:hover .img.img-ready {
     transform: scale(1.05);
   }
 
   .img-wrap {
     width: 100%;
     overflow: hidden;
+    box-shadow: none;
+    transition: box-shadow 350ms ease-out;
+  }
+
+  .img-wrap:has(img.img-animate),
+  .img-wrap:has(img.img-ready),
+  .img-wrap:has(.img-placeholder) {
     box-shadow: var(--shadow-image);
   }
 

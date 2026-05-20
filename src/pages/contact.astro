@@ -24,6 +24,7 @@ const formNote =
 const hours =
   renderRichText(content?.hours) ??
   "Monday – Friday: 9:00 AM – 5:00 PM\nSaturday - Sunday: Closed";
+const hoursFormatted = hours.replace(/: (\d[^<\n]*)/g, ': <span class="contact__hours-time">$1</span>');
 ---
 
 <PageLayout
@@ -61,7 +62,7 @@ const hours =
 
       <section class="contact__hours">
         <h2 class="contact__hours-heading">Hours of Operation</h2>
-        <div class="contact__hours-list" set:html={hours}></div>
+        <div class="contact__hours-list" set:html={hoursFormatted}></div>
       </section>
     </div>
   </div>
@@ -254,6 +255,15 @@ const hours =
     margin: 0;
   }
 
+  .contact__hours-list p {
+    margin: 0;
+    white-space: pre-line;
+  }
+
+  .contact__hours-time {
+    display: inline;
+  }
+
   @media (max-width: 768px) {
     .contact__phone {
       flex-direction: column;
@@ -278,8 +288,11 @@ const hours =
     }
 
     .contact__hours-list {
-      display: inline-block;
-      text-align: left;
+      text-align: center;
+    }
+
+    .contact__hours-time {
+      display: block;
     }
   }
 </style>

@@ -297,7 +297,7 @@ const resolvedOgImage = ogImage.startsWith("http") ? ogImage : `${siteUrl}${ogIm
 
 		// Reset any previous run
 		images.forEach((img) => {
-			img.classList.remove("img-animate", "img-done");
+			img.classList.remove("img-animate", "img-done", "img-ready");
 			img.style.removeProperty("--img-delay");
 		});
 
@@ -306,6 +306,7 @@ const resolvedOgImage = ogImage.startsWith("http") ? ogImage : `${siteUrl}${ogIm
 			images.forEach((img) => {
 				img.style.opacity = "1";
 				img.style.transform = "none";
+				img.classList.add("img-ready");
 			});
 			return;
 		}
@@ -325,6 +326,9 @@ const resolvedOgImage = ogImage.startsWith("http") ? ogImage : `${siteUrl}${ogIm
 			img.addEventListener("animationend", () => {
 				img.classList.add("img-done");
 				img.classList.remove("img-animate");
+				requestAnimationFrame(() => {
+					requestAnimationFrame(() => img.classList.add("img-ready"));
+				});
 			}, { once: true });
 		};
 
