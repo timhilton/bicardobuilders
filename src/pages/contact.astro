@@ -56,7 +56,8 @@ const hours =
         <a href={`tel:${phoneNumber.replace(/\D/g, "")}`}>{phoneNumber}</a>
       </p>
 
-      <ContactForm client:load formNote={formNote} />
+      <div class="contact__form-note" set:html={formNote} />
+      <ContactForm client:load />
 
       <section class="contact__hours">
         <h2 class="contact__hours-heading">Hours of Operation</h2>
@@ -148,7 +149,8 @@ const hours =
     letter-spacing: var(--tracking-1);
   }
 
-  .contact__form-note {
+  .contact__form-note,
+  .contact__form-note p {
     color: var(--color-text-primary);
     text-align: center;
     width: 100%;

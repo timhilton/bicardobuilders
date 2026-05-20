@@ -1,9 +1,5 @@
 import { useState } from 'react';
 
-interface Props {
-	formNote: string;
-}
-
 type FieldKey = 'name' | 'phone' | 'email' | 'message';
 
 const EMPTY_VALUES: Record<FieldKey, string> = { name: '', phone: '', email: '', message: '' };
@@ -24,7 +20,7 @@ function getFieldValidity(id: FieldKey, value: string): 'neutral' | 'valid' | 'i
 	}
 }
 
-export default function ContactForm({ formNote }: Props) {
+export default function ContactForm() {
 	const [submitting, setSubmitting] = useState(false);
 	const [modal, setModal] = useState<{ visible: boolean; success: boolean }>({ visible: false, success: false });
 	const [focused, setFocused] = useState<string | null>(null);
@@ -146,10 +142,6 @@ export default function ContactForm({ formNote }: Props) {
 			}}>
 				Send us a message
 			</h2>
-			<p
-				style={{ color: 'var(--color-text-primary)', textAlign: 'center', width: '100%', fontSize: '16px', margin: '0 0 24px' }}
-				dangerouslySetInnerHTML={{ __html: formNote }}
-			/>
 			<form style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} onSubmit={handleSubmit} noValidate>
 				<div style={groupStyle}>
 					<label style={floatLabelStyle('name')} htmlFor="name">Name</label>
