@@ -20,4 +20,5 @@ export default defineConfig({
   },
   adapter: netlify(),
   output: 'server',
+  site: 'https://bicardobuilders.netlify.app',
 });
