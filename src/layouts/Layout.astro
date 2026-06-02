@@ -16,7 +16,7 @@ const {
 	ogType = "website",
 	robots = "index, follow",
 } = Astro.props;
-const siteUrl = "https://bicardobuilders.com";
+const siteUrl = Astro.url.origin;
 const canonicalUrl = `${siteUrl}${Astro.url.pathname}`;
 const resolvedOgImage = ogImage.startsWith("http") ? ogImage : `${siteUrl}${ogImage}`;
 ---
