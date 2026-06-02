@@ -16,7 +16,9 @@ const {
 	ogType = "website",
 	robots = "index, follow",
 } = Astro.props;
-const siteUrl = Astro.url.origin;
+const forwardedHost = Astro.request.headers.get('x-forwarded-host');
+const forwardedProto = Astro.request.headers.get('x-forwarded-proto') ?? 'https';
+const siteUrl = forwardedHost ? `${forwardedProto}://${forwardedHost}` : Astro.url.origin;
 const canonicalUrl = `${siteUrl}${Astro.url.pathname}`;
 const resolvedOgImage = ogImage.startsWith("http") ? ogImage : `${siteUrl}${ogImage}`;
 ---
