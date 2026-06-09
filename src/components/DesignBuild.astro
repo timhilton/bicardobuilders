@@ -44,15 +44,7 @@ const images: string[] = (blok?.images as { filename: string }[] | undefined)
 			</div>
 		</div>
 	</div>
-	{bodyHtml
-		? <div class="design-build__body" set:html={bodyHtml} />
-		: <div class="design-build__body">
-				<p>At Bicardo Builders, exceptional residential design and construction begin with a fully integrated Design-Build process.</p>
-				<p>Design-Build is an ideal delivery method for a wide range of residential projects, from remodels and renovations to custom luxury homes. By bringing design, planning, budgeting, and construction together under one experienced team, we create a more efficient process built on clear communication, responsive decision-making, and greater cost control.</p>
-				<p>The result is a streamlined experience that saves time, maximizes value, and delivers exceptional craftsmanship from concept to completion.</p>
-				<p>If you are considering a residential construction project, we invite you to explore the benefits of our Design-Build services. We look forward to learning about your vision and helping bring it to life.</p>
-			</div>
-	}
+	{bodyHtml && <div class="design-build__body" set:html={bodyHtml} />}
 </section>
 
 <style>
