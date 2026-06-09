@@ -44,7 +44,9 @@ const servicesImages: string[] =
 		<ul class="services__list">
 			{
 				serviceItems.map((item) => (
-					<li class="services__list-item">{item}</li>
+					<li class="services__list-item">
+						{item === "Design / Build" ? <a href="#design-build">{item}</a> : item}
+					</li>
 				))
 			}
 		</ul>
@@ -197,6 +199,13 @@ const servicesImages: string[] =
 		&:hover {
 			transform: translateX(-16px);
 		}
+
+		a {
+			color: inherit;
+			text-decoration: none;
+			display: block;
+			width: 100%;
+		}
 	}
 
 	@media (max-width: 768px) {
@@ -251,3 +260,13 @@ const servicesImages: string[] =
 		font-size: var(--text-xl);
 	}
 </style>
+
+<script>
+	document.addEventListener('astro:page-load', () => {
+		const link = document.querySelector('a[href="#design-build"]');
+		link?.addEventListener('click', (e) => {
+			e.preventDefault();
+			document.getElementById('design-build')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		});
+	});
+</script>
